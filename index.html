@@ -3680,7 +3680,7 @@
             right: 0;
             height: 64px;
             background: var(--navy);
-            border-top: 1px solid rgba(255,255,255,.08);
+            border-top: 1px solid rgba(255, 255, 255, .08);
             z-index: 100;
             padding: 0 4px;
             align-items: stretch;
@@ -3824,7 +3824,8 @@
           }
 
           /* Prevenir scroll horizontal global */
-          html, body {
+          html,
+          body {
             overflow-x: hidden
           }
 
@@ -4256,11 +4257,33 @@
                 <div class="searchbar"><svg class="ic ic20">
                     <use href="#i-search"></use>
                   </svg><input placeholder="Busca por nombre de producto..." value="{{ prodSearchVal }}"
-                    onInput="{{ setProdSearch }}"></div><div class="prod-filter-wrap"><button class="iconbtn-lg prod-filter-btn {{ prodFilterBtnCls }}" onClick="{{ toggleProdFilter }}" style-hover="border-color:var(--brand);color:var(--brand)"><svg class="ic ic20"><use href="#i-sliders"></use></svg><sc-if value="{{ prodHasFilter }}" hint-placeholder-val="{{ false }}"><span class="etiq-filter-badge">{{ prodFilterCount }}</span></sc-if></button><sc-if value="{{ prodFilterOpen }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;inset:0;z-index:49" onClick="{{ toggleProdFilter }}"></div><div class="prod-filter-drop"><div class="etiq-filter-sect"><div class="etiq-filter-sect-lbl">Categoría</div><div class="etiq-filter-chips"><sc-for list="{{ filterChips }}" as="ch" hint-placeholder-count="7"><button class="chip {{ ch.cls }}" style="{{ ch.style }}" onClick="{{ ch.onClick }}"><span class="chipicon" style="background:{{ ch.color }}"><svg class="ic ic16"><use href="{{ ch.icon }}"></use></svg></span><span>{{ ch.name }}</span><span class="chipcount">{{ ch.count }}</span></button></sc-for></div></div></div></sc-if></div>
+                    onInput="{{ setProdSearch }}"></div>
+                <div class="prod-filter-wrap"><button class="iconbtn-lg prod-filter-btn {{ prodFilterBtnCls }}"
+                    onClick="{{ toggleProdFilter }}" style-hover="border-color:var(--brand);color:var(--brand)"><svg
+                      class="ic ic20">
+                      <use href="#i-sliders"></use>
+                    </svg><sc-if value="{{ prodHasFilter }}" hint-placeholder-val="{{ false }}"><span
+                        class="etiq-filter-badge">{{ prodFilterCount }}</span></sc-if></button><sc-if
+                    value="{{ prodFilterOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:fixed;inset:0;z-index:49" onClick="{{ toggleProdFilter }}"></div>
+                    <div class="prod-filter-drop">
+                      <div class="etiq-filter-sect">
+                        <div class="etiq-filter-sect-lbl">Categoría</div>
+                        <div class="etiq-filter-chips"><sc-for list="{{ filterChips }}" as="ch"
+                            hint-placeholder-count="7"><button class="chip {{ ch.cls }}" style="{{ ch.style }}"
+                              onClick="{{ ch.onClick }}"><span class="chipicon" style="background:{{ ch.color }}"><svg
+                                  class="ic ic16">
+                                  <use href="{{ ch.icon }}"></use>
+                                </svg></span><span>{{ ch.name }}</span><span class="chipcount">{{ ch.count
+                                }}</span></button></sc-for></div>
+                      </div>
+                    </div>
+                  </sc-if></div>
               </div>
-              <div class="chips chips-desktop"><sc-for list="{{ filterChips }}" as="ch" hint-placeholder-count="7"><button
-                    class="chip {{ ch.cls }}" style="{{ ch.style }}" onClick="{{ ch.onClick }}"><span class="chipicon"
-                      style="background:{{ ch.color }}"><svg class="ic ic16">
+              <div class="chips chips-desktop"><sc-for list="{{ filterChips }}" as="ch"
+                  hint-placeholder-count="7"><button class="chip {{ ch.cls }}" style="{{ ch.style }}"
+                    onClick="{{ ch.onClick }}"><span class="chipicon" style="background:{{ ch.color }}"><svg
+                        class="ic ic16">
                         <use href="{{ ch.icon }}"></use>
                       </svg></span><span>{{ ch.name }}</span><span class="chipcount">{{ ch.count
                       }}</span></button></sc-for></div>
@@ -4848,354 +4871,375 @@
                                 <use href="#i-pencil"></use>
                               </svg>Editar</button></div>
                         </div>
-                    </sc-for></div>
-              </sc-if>
-              <sc-if value="{{ noEtiqItems }}" hint-placeholder-val="{{ false }}">
-                <div class="empty" style="border-radius:24px;padding:80px 32px;border:1px dashed var(--line-2)">
-                  <div class="icb icb62" style="background:var(--brand-50);color:var(--brand);margin-bottom:22px"><svg
-                      class="ic ic28">
-                      <use href="#i-tag"></use>
-                    </svg></div>
-                  <h3 style="font-size:19px;color:var(--t1);margin:0 0 10px">No hay etiquetas aún</h3>
-                  <p style="max-width:360px;margin:0;font-size:14.5px;color:var(--t3);line-height:1.5">Crea tu primera
-                    etiqueta combinando un producto con un modelo de impresión.</p>
+                      </sc-for></div>
+                  </sc-if>
+                  <sc-if value="{{ noEtiqItems }}" hint-placeholder-val="{{ false }}">
+                    <div class="empty" style="border-radius:24px;padding:80px 32px;border:1px dashed var(--line-2)">
+                      <div class="icb icb62" style="background:var(--brand-50);color:var(--brand);margin-bottom:22px">
+                        <svg class="ic ic28">
+                          <use href="#i-tag"></use>
+                        </svg>
+                      </div>
+                      <h3 style="font-size:19px;color:var(--t1);margin:0 0 10px">No hay etiquetas aún</h3>
+                      <p style="max-width:360px;margin:0;font-size:14.5px;color:var(--t3);line-height:1.5">Crea tu
+                        primera
+                        etiqueta combinando un producto con un modelo de impresión.</p>
+                    </div>
+                  </sc-if>
                 </div>
               </sc-if>
-            </div>
-          </sc-if>
-          <sc-if value="{{ etiqPreviewOpen }}" hint-placeholder-val="{{ false }}">
-            <div class="etiq-preview-overlay">
-              <div class="etiq-overlay-bg" onClick="{{ closeEtiqPreview }}"></div>
-              <div class="etiq-overlay-box">
-                <div class="etiq-overlay-head">
-                  <div class="icb icb44" style="background:var(--brand-50);color:var(--brand)"><svg class="ic ic20">
-                      <use href="#i-tag"></use>
-                    </svg></div>
-                  <div class="etiq-overlay-title">{{ etiqPreviewItem.prodName }}<div
-                      style="font-size:12px;font-weight:500;color:var(--t3);margin-top:2px">Modelo: {{
-                      etiqPreviewItem.modelName }}</div>
-                  </div><button class="iconbtn" onClick="{{ closeEtiqPreview }}"
-                    style-hover="border-color:var(--red);color:var(--red)"><svg class="ic ic18">
-                      <use href="#i-x"></use>
-                    </svg></button>
-                </div>
-                <div class="etiq-overlay-body">
-                  <div class="etiq-overlay-render">
-                    <div class="lr-header"
-                      style="background:{{ etiqPreviewItem.prevHeaderBg }};padding:13px 20px;min-height:52px"><sc-if
-                        value="{{ etiqPreviewItem.prevShowLogoLeft }}" hint-placeholder-val="{{ false }}">
-                        <div class="lr-logo-ph">LOGO</div>
-                      </sc-if><span class="lr-namelbl" style="font-size:11px">Nombre del producto</span><sc-if
-                        value="{{ etiqPreviewItem.prevShowLogoRight }}" hint-placeholder-val="{{ false }}">
-                        <div class="lr-logo-ph">LOGO</div>
-                      </sc-if></div>
-                    <div class="lr-namebar" style="background:{{ etiqPreviewItem.prevHeaderBg }};padding:8px 20px 16px">
-                      <div class="lr-namebar-text" style="font-size:26px">{{ etiqPreviewItem.prodName }}</div>
-                    </div><sc-if value="{{ etiqPreviewItem.prevHasRows }}" hint-placeholder-val="{{ false }}">
-                      <div class="lr-body" style="padding:14px 20px 18px;gap:12px;background:#fff"><sc-for
-                          list="{{ etiqPreviewItem.prevRows }}" as="pr" hint-placeholder-count="1"><sc-if
-                            value="{{ pr.showDivider }}" hint-placeholder-val="{{ false }}">
-                            <div style="{{ pr.divStyle }}"></div>
-                          </sc-if>
-                          <div class="lr-row" style="{{ pr.rowStyle }}"><sc-for list="{{ pr.fields }}" as="pf"
-                              hint-placeholder-count="1">
-                              <div class="lr-field">
-                                <div class="lr-lbl" style="{{ etiqPreviewItem.prevLabelStyle }}">{{ pf.label }}</div>
-                                <div class="lr-val" style="{{ etiqPreviewItem.prevValueStyle }}">{{ pf.value }}</div>
-                              </div>
+              <sc-if value="{{ etiqPreviewOpen }}" hint-placeholder-val="{{ false }}">
+                <div class="etiq-preview-overlay">
+                  <div class="etiq-overlay-bg" onClick="{{ closeEtiqPreview }}"></div>
+                  <div class="etiq-overlay-box">
+                    <div class="etiq-overlay-head">
+                      <div class="icb icb44" style="background:var(--brand-50);color:var(--brand)"><svg class="ic ic20">
+                          <use href="#i-tag"></use>
+                        </svg></div>
+                      <div class="etiq-overlay-title">{{ etiqPreviewItem.prodName }}<div
+                          style="font-size:12px;font-weight:500;color:var(--t3);margin-top:2px">Modelo: {{
+                          etiqPreviewItem.modelName }}</div>
+                      </div><button class="iconbtn" onClick="{{ closeEtiqPreview }}"
+                        style-hover="border-color:var(--red);color:var(--red)"><svg class="ic ic18">
+                          <use href="#i-x"></use>
+                        </svg></button>
+                    </div>
+                    <div class="etiq-overlay-body">
+                      <div class="etiq-overlay-render">
+                        <div class="lr-header"
+                          style="background:{{ etiqPreviewItem.prevHeaderBg }};padding:13px 20px;min-height:52px"><sc-if
+                            value="{{ etiqPreviewItem.prevShowLogoLeft }}" hint-placeholder-val="{{ false }}">
+                            <div class="lr-logo-ph">LOGO</div>
+                          </sc-if><span class="lr-namelbl" style="font-size:11px">Nombre del producto</span><sc-if
+                            value="{{ etiqPreviewItem.prevShowLogoRight }}" hint-placeholder-val="{{ false }}">
+                            <div class="lr-logo-ph">LOGO</div>
+                          </sc-if></div>
+                        <div class="lr-namebar"
+                          style="background:{{ etiqPreviewItem.prevHeaderBg }};padding:8px 20px 16px">
+                          <div class="lr-namebar-text" style="font-size:26px">{{ etiqPreviewItem.prodName }}</div>
+                        </div><sc-if value="{{ etiqPreviewItem.prevHasRows }}" hint-placeholder-val="{{ false }}">
+                          <div class="lr-body" style="padding:14px 20px 18px;gap:12px;background:#fff"><sc-for
+                              list="{{ etiqPreviewItem.prevRows }}" as="pr" hint-placeholder-count="1"><sc-if
+                                value="{{ pr.showDivider }}" hint-placeholder-val="{{ false }}">
+                                <div style="{{ pr.divStyle }}"></div>
+                              </sc-if>
+                              <div class="lr-row" style="{{ pr.rowStyle }}"><sc-for list="{{ pr.fields }}" as="pf"
+                                  hint-placeholder-count="1">
+                                  <div class="lr-field">
+                                    <div class="lr-lbl" style="{{ etiqPreviewItem.prevLabelStyle }}">{{ pf.label }}
+                                    </div>
+                                    <div class="lr-val" style="{{ etiqPreviewItem.prevValueStyle }}">{{ pf.value }}
+                                    </div>
+                                  </div>
+                                </sc-for></div>
                             </sc-for></div>
-                        </sc-for></div>
-                    </sc-if>
-                  </div>
-                  <div class="etiq-qty-row"><span class="etiq-qty-lbl">Cantidad de copias</span>
-                    <div class="etiq-qty-ctrl"><button class="etiq-qty-btn" onClick="{{ decQty }}">−</button><input
-                        class="etiq-qty-val" type="number" min="1" value="{{ etiqQty }}"
-                        onInput="{{ setEtiqQty }}"><button class="etiq-qty-btn" onClick="{{ incQty }}">+</button></div>
-                  </div><button class="etiq-print-btn" style-hover="filter:brightness(.92)"><svg class="ic ic18">
-                      <use href="#i-printer"></use>
-                    </svg><span>{{ printBtnLabel }}</span></button>
-                </div>
-              </div>
-            </div>
-          </sc-if>
-          <sc-if value="{{ isEtiqCrear }}" hint-placeholder-val="{{ false }}">
-            <div class="etiq-crear2">
-              <div class="ec-crear-header">
-                <div class="ec-crear-title"><sc-if value="{{ isEtiqEdit }}" hint-placeholder-val="{{ false }}">
-                    <div class="icb icb44" style="background:var(--brand-50);color:var(--brand)"><svg class="ic ic20">
-                        <use href="#i-pencil"></use>
-                      </svg></div>
-                    <div>
-                      <div style="font-size:20px;font-weight:700;color:var(--t1)">Editar etiqueta</div>
-                      <div style="font-size:13px;color:var(--t3);margin-top:2px">Modifica los parámetros y guarda los
-                        cambios.</div>
-                    </div>
-                  </sc-if><sc-if value="{{ isEtiqNew }}" hint-placeholder-val="{{ true }}">
-                    <div class="icb icb44" style="background:var(--brand-50);color:var(--brand)"><svg class="ic ic20">
-                        <use href="#i-tag"></use>
-                      </svg></div>
-                    <div>
-                      <div style="font-size:20px;font-weight:700;color:var(--t1)">Nueva etiqueta</div>
-                      <div style="font-size:13px;color:var(--t3);margin-top:2px">Selecciona un producto y un modelo para
-                        crear tu etiqueta.</div>
-                    </div>
-                  </sc-if></div>
-              </div>
-              <div class="ec-toprow">
-                <div class="tips-card" style="margin-top:0">
-                  <div class="tips-title"><svg class="ic ic15" style="color:var(--brand)">
-                      <use href="#i-star"></use>
-                    </svg>Buenas prácticas de etiquetado</div>
-                  <div class="tips-list">
-                    <div class="tips-item">
-                      <div class="tips-dot" style="background:#EAF4FE"><svg class="ic ic12" style="color:#2F9CF5">
-                          <use href="#i-check"></use>
-                        </svg></div><span>Verifica siempre la fecha antes de imprimir — un error en la caducidad puede
-                        causar problemas sanitarios.</span>
-                    </div>
-                    <div class="tips-item">
-                      <div class="tips-dot" style="background:#e7f9ee"><svg class="ic ic12" style="color:#22C55E">
-                          <use href="#i-check"></use>
-                        </svg></div><span>El campo "Responsable" debe reflejar quien elaboró el producto, no quien
-                        imprimió la etiqueta.</span>
-                    </div>
-                    <div class="tips-item">
-                      <div class="tips-dot" style="background:#fff4e6"><svg class="ic ic12" style="color:#FF8D28">
-                          <use href="#i-check"></use>
-                        </svg></div><span>Para congelación, registra la temperatura exacta del equipo, no la temperatura
-                        objetivo.</span>
-                    </div>
-                    <div class="tips-item">
-                      <div class="tips-dot" style="background:#fce7f4"><svg class="ic ic12" style="color:#EC4899">
-                          <use href="#i-check"></use>
-                        </svg></div><span>Imprime la etiqueta inmediatamente antes de aplicarla para que los datos sean
-                        siempre actuales.</span>
+                        </sc-if>
+                      </div>
+                      <div class="etiq-qty-row"><span class="etiq-qty-lbl">Cantidad de copias</span>
+                        <div class="etiq-qty-ctrl"><button class="etiq-qty-btn" onClick="{{ decQty }}">−</button><input
+                            class="etiq-qty-val" type="number" min="1" value="{{ etiqQty }}"
+                            onInput="{{ setEtiqQty }}"><button class="etiq-qty-btn" onClick="{{ incQty }}">+</button>
+                        </div>
+                      </div><button class="etiq-print-btn" style-hover="filter:brightness(.92)"><svg class="ic ic18">
+                          <use href="#i-printer"></use>
+                        </svg><span>{{ printBtnLabel }}</span></button>
                     </div>
                   </div>
                 </div>
-                <div class="ec-prev-card">
-                  <div class="lprev-title"><span>Vista previa</span><sc-if value="{{ etiqHasSel }}"
-                      hint-placeholder-val="{{ false }}"><span
-                        style="font-size:11px;color:var(--t3);font-weight:400;letter-spacing:0">Toca un campo para
-                        editarlo</span></sc-if></div><sc-if value="{{ etiqHasSel }}" hint-placeholder-val="{{ false }}">
-                    <div class="ec-prev-stage">
-                      <div class="ec-prev-inner">
-                        <div style="{{ ecRenderStyle }}"><sc-if value="{{ ecHasAbove }}"
-                            hint-placeholder-val="{{ false }}">
-                            <div class="lr-body" style="padding-bottom:8px"><sc-for list="{{ ecRowsAbove }}" as="row"
-                                hint-placeholder-count="0"><sc-if value="{{ row.showDivider }}"
-                                  hint-placeholder-val="{{ false }}">
-                                  <div style="{{ ecDivStyle }}"></div>
-                                </sc-if>
-                                <div class="lr-row" style="{{ row.rowStyle }}"><sc-for list="{{ row.fields }}" as="f"
-                                    hint-placeholder-count="1">
-                                    <div class="lr-field ec-field" onClick="{{ f.onOpenField }}">
-                                      <div class="lr-lbl" style="{{ ecLabelStyle }}">{{ f.label }}</div><sc-if
-                                        value="{{ f.hasValue }}" hint-placeholder-val="{{ false }}">
-                                        <div class="lr-val" style="{{ ecValueStyle }}">{{ f.value }}</div>
-                                      </sc-if><sc-if value="{{ f.noValue }}" hint-placeholder-val="{{ true }}">
-                                        <div class="lr-val" style="{{ ecValueStyle }}"><span class="ec-val-empty"
-                                            style="color:{{ ecHeaderBg }}"></span></div>
-                                      </sc-if><sc-if value="{{ f.isOpen }}" hint-placeholder-val="{{ false }}">
-                                        <div class="ec-field-backdrop" onClick="{{ f.onCancelField }}"></div>
-                                        <div class="ec-field-modal" onClick="{{ f.stopProp }}">
-                                          <div class="ec-fm-head">
-                                            <div class="ec-fm-ico"><svg class="ic ic18">
-                                                <use href="#i-pencil"></use>
-                                              </svg></div>
-                                            <div>
-                                              <div class="ec-fm-title">{{ f.label }}</div>
-                                              <div class="ec-fm-sub">Introduce el valor para este campo</div>
-                                            </div>
-                                          </div><input class="ec-fm-input" type="{{ f.inputType }}"
-                                            value="{{ f.draft }}" onInput="{{ f.onDraftInput }}" autoFocus="{{ true }}">
-                                          <div class="ec-fm-actions"><button class="btn btn-ghost f1"
-                                              onClick="{{ f.onCancelField }}"
-                                              style-hover="background:var(--bg)">Cancelar</button><button
-                                              class="btn btn-primary f1" onClick="{{ f.onSaveField }}"
-                                              style-hover="filter:brightness(.94)">Guardar</button></div>
-                                        </div>
-                                      </sc-if>
-                                    </div>
-                                  </sc-for></div>
-                              </sc-for></div>
-                          </sc-if>
-                          <div class="lr-header" style="background:{{ ecHeaderBg }}"><sc-if value="{{ ecLogoLeft }}"
-                              hint-placeholder-val="{{ false }}">
-                              <div class="lr-logo-ph">LOGO</div>
-                            </sc-if><span class="lr-namelbl">Nombre del producto</span><sc-if value="{{ ecLogoRight }}"
-                              hint-placeholder-val="{{ false }}">
-                              <div class="lr-logo-ph">LOGO</div>
-                            </sc-if></div>
-                          <div class="lr-namebar" style="background:{{ ecHeaderBg }}">
-                            <div class="lr-namebar-text">{{ ecProdName }}</div>
-                          </div><sc-if value="{{ ecHasBelow }}" hint-placeholder-val="{{ false }}">
-                            <div class="lr-body" style="padding-top:8px"><sc-for list="{{ ecRowsBelow }}" as="row"
-                                hint-placeholder-count="0"><sc-if value="{{ row.showDivider }}"
-                                  hint-placeholder-val="{{ false }}">
-                                  <div style="{{ ecDivStyle }}"></div>
-                                </sc-if>
-                                <div class="lr-row" style="{{ row.rowStyle }}"><sc-for list="{{ row.fields }}" as="f"
-                                    hint-placeholder-count="1">
-                                    <div class="lr-field ec-field" onClick="{{ f.onOpenField }}">
-                                      <div class="lr-lbl" style="{{ ecLabelStyle }}">{{ f.label }}</div><sc-if
-                                        value="{{ f.hasValue }}" hint-placeholder-val="{{ false }}">
-                                        <div class="lr-val" style="{{ ecValueStyle }}">{{ f.value }}</div>
-                                      </sc-if><sc-if value="{{ f.noValue }}" hint-placeholder-val="{{ true }}">
-                                        <div class="lr-val" style="{{ ecValueStyle }}"><span class="ec-val-empty"
-                                            style="color:{{ ecHeaderBg }}"></span></div>
-                                      </sc-if><sc-if value="{{ f.isOpen }}" hint-placeholder-val="{{ false }}">
-                                        <div class="ec-field-backdrop" onClick="{{ f.onCancelField }}"></div>
-                                        <div class="ec-field-modal" onClick="{{ f.stopProp }}">
-                                          <div class="ec-fm-head">
-                                            <div class="ec-fm-ico"><svg class="ic ic18">
-                                                <use href="#i-pencil"></use>
-                                              </svg></div>
-                                            <div>
-                                              <div class="ec-fm-title">{{ f.label }}</div>
-                                              <div class="ec-fm-sub">Introduce el valor para este campo</div>
-                                            </div>
-                                          </div><input class="ec-fm-input" type="{{ f.inputType }}"
-                                            value="{{ f.draft }}" onInput="{{ f.onDraftInput }}" autoFocus="{{ true }}">
-                                          <div class="ec-fm-actions"><button class="btn btn-ghost f1"
-                                              onClick="{{ f.onCancelField }}"
-                                              style-hover="background:var(--bg)">Cancelar</button><button
-                                              class="btn btn-primary f1" onClick="{{ f.onSaveField }}"
-                                              style-hover="filter:brightness(.94)">Guardar</button></div>
-                                        </div>
-                                      </sc-if>
-                                    </div>
-                                  </sc-for></div>
-                              </sc-for></div>
-                          </sc-if>
+              </sc-if>
+              <sc-if value="{{ isEtiqCrear }}" hint-placeholder-val="{{ false }}">
+                <div class="etiq-crear2">
+                  <div class="ec-crear-header">
+                    <div class="ec-crear-title"><sc-if value="{{ isEtiqEdit }}" hint-placeholder-val="{{ false }}">
+                        <div class="icb icb44" style="background:var(--brand-50);color:var(--brand)"><svg
+                            class="ic ic20">
+                            <use href="#i-pencil"></use>
+                          </svg></div>
+                        <div>
+                          <div style="font-size:20px;font-weight:700;color:var(--t1)">Editar etiqueta</div>
+                          <div style="font-size:13px;color:var(--t3);margin-top:2px">Modifica los parámetros y guarda
+                            los
+                            cambios.</div>
+                        </div>
+                      </sc-if><sc-if value="{{ isEtiqNew }}" hint-placeholder-val="{{ true }}">
+                        <div class="icb icb44" style="background:var(--brand-50);color:var(--brand)"><svg
+                            class="ic ic20">
+                            <use href="#i-tag"></use>
+                          </svg></div>
+                        <div>
+                          <div style="font-size:20px;font-weight:700;color:var(--t1)">Nueva etiqueta</div>
+                          <div style="font-size:13px;color:var(--t3);margin-top:2px">Selecciona un producto y un modelo
+                            para
+                            crear tu etiqueta.</div>
+                        </div>
+                      </sc-if></div>
+                  </div>
+                  <div class="ec-toprow">
+                    <div class="tips-card" style="margin-top:0">
+                      <div class="tips-title"><svg class="ic ic15" style="color:var(--brand)">
+                          <use href="#i-star"></use>
+                        </svg>Buenas prácticas de etiquetado</div>
+                      <div class="tips-list">
+                        <div class="tips-item">
+                          <div class="tips-dot" style="background:#EAF4FE"><svg class="ic ic12" style="color:#2F9CF5">
+                              <use href="#i-check"></use>
+                            </svg></div><span>Verifica siempre la fecha antes de imprimir — un error en la caducidad
+                            puede
+                            causar problemas sanitarios.</span>
+                        </div>
+                        <div class="tips-item">
+                          <div class="tips-dot" style="background:#e7f9ee"><svg class="ic ic12" style="color:#22C55E">
+                              <use href="#i-check"></use>
+                            </svg></div><span>El campo "Responsable" debe reflejar quien elaboró el producto, no quien
+                            imprimió la etiqueta.</span>
+                        </div>
+                        <div class="tips-item">
+                          <div class="tips-dot" style="background:#fff4e6"><svg class="ic ic12" style="color:#FF8D28">
+                              <use href="#i-check"></use>
+                            </svg></div><span>Para congelación, registra la temperatura exacta del equipo, no la
+                            temperatura
+                            objetivo.</span>
+                        </div>
+                        <div class="tips-item">
+                          <div class="tips-dot" style="background:#fce7f4"><svg class="ic ic12" style="color:#EC4899">
+                              <use href="#i-check"></use>
+                            </svg></div><span>Imprime la etiqueta inmediatamente antes de aplicarla para que los datos
+                            sean
+                            siempre actuales.</span>
                         </div>
                       </div>
                     </div>
-                  </sc-if><sc-if value="{{ etiqNoSel }}" hint-placeholder-val="{{ true }}">
-                    <div class="etiq-empty-prev" style="margin-top:6px"><svg class="ic ic28">
-                        <use href="#i-tag"></use>
-                      </svg>Selecciona un producto y un modelo<br>para previsualizar la etiqueta</div>
-                  </sc-if>
-                </div>
-              </div>
-              <div class="ec-actions"><sc-if value="{{ isEtiqEdit }}" hint-placeholder-val="{{ false }}"><button
-                    class="btn ec-btn-danger" onClick="{{ onDeleteEtiq }}"
-                    style-hover="background:#fdeaea;border-color:var(--red)"><svg class="ic ic18">
-                      <use href="#i-trash"></use>
-                    </svg><span>Eliminar</span></button></sc-if>
-                <div class="ec-actions-right"><button class="btn btn-ghost" onClick="{{ cancelCrearEtiq }}"
-                    style-hover="background:var(--bg)">Cancelar</button><sc-if value="{{ etiqHasSel }}"
-                    hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ onPdfEtiq }}"
-                      style-hover="background:var(--bg)"><svg class="ic ic18">
-                        <use href="#i-archive"></use>
-                      </svg><span>Descargar PDF</span></button><button class="btn btn-ghost" onClick="{{ onPrintEtiq }}"
-                      style-hover="background:var(--bg)"><svg class="ic ic18">
-                        <use href="#i-printer"></use>
-                      </svg><span>Imprimir</span></button><button class="btn btn-primary" onClick="{{ onSaveEtiq }}"
-                      style-hover="filter:brightness(.94)"><svg class="ic ic18">
-                        <use href="#i-check"></use>
-                      </svg><span>{{ ecPrimaryLabel }}</span></button></sc-if></div>
-              </div>
-              <div class="ec-bottomrow">
-                <div class="etiq-creator-col">
-                  <div class="etiq-sec-title"><svg class="ic ic16">
-                      <use href="#i-salad"></use>
-                    </svg>1. Selecciona un producto</div>
-                  <div class="etiq-creator-search"><svg class="ic ic14" style="color:var(--t3);flex-shrink:0">
-                      <use href="#i-search"></use>
-                    </svg><input placeholder="Buscar producto..." value="{{ etiqCreatorSearchVal }}"
-                      onInput="{{ setEtiqCreatorSearch }}"></div>
-                  <div class="etiq-creator-cats"><sc-for list="{{ etiqCreatorCatChips }}" as="cc"
-                      hint-placeholder-count="4"><button class="etiq-cc-chip {{ cc.cls }}" onClick="{{ cc.onClick }}">{{
-                        cc.name }}</button></sc-for></div>
-                  <div class="prod-page-grid"><sc-for list="{{ etiqProdItems }}" as="p"
-                      hint-placeholder-count="6"><button class="{{ p.cls }}" onClick="{{ p.onSelect }}"
-                        style-hover="border-color:var(--brand)">
-                        <div class="icb icb34" style="background:{{ p.color }};flex-shrink:0"><svg class="ic ic16">
-                            <use href="{{ p.icon }}"></use>
-                          </svg></div>
-                        <div style="text-align:left;min-width:0;overflow:hidden">
-                          <div class="selprod-name">{{ p.name }}</div>
-                          <div class="selprod-cat">{{ p.catName }}</div>
-                        </div>
-                      </button></sc-for></div>
-                  <sc-if value="{{ etiqProdHasPager }}" hint-placeholder-val="{{ false }}">
-                    <div class="prod-pager"><button class="prod-pager-btn" onClick="{{ etiqProdPrevPage }}"
-                        disabled="{{ etiqProdPrevDis }}"><svg class="ic ic14" style="transform:rotate(90deg)">
-                          <use href="#i-chevron-down"></use>
-                        </svg><span>Anterior</span></button>
-                      <div class="prod-pager-dots"><sc-for list="{{ etiqProdPageDots }}" as="d"
-                          hint-placeholder-count="2">
-                          <div class="{{ d.cls }}"></div>
-                        </sc-for></div><button class="prod-pager-btn" onClick="{{ etiqProdNextPage }}"
-                        disabled="{{ etiqProdNextDis }}"><span>Siguiente</span><svg class="ic ic14"
-                          style="transform:rotate(-90deg)">
-                          <use href="#i-chevron-down"></use>
-                        </svg></button>
-                    </div>
-                  </sc-if>
-                </div>
-                <div class="etiq-creator-col">
-                  <div class="etiq-sec-title"><svg class="ic ic16">
-                      <use href="#i-tag"></use>
-                    </svg>2. Selecciona un modelo</div>
-                  <div class="etiq-creator-search"><svg class="ic ic14" style="color:var(--t3);flex-shrink:0">
-                      <use href="#i-search"></use>
-                    </svg><input placeholder="Buscar modelo..." value="{{ etiqModeloSearchVal }}"
-                      onInput="{{ setEtiqModeloSearch }}"></div>
-                  <div style="display:flex;flex-direction:column;gap:9px"><sc-for list="{{ etiqModeloItems }}" as="m"
-                      hint-placeholder-count="4"><button class="{{ m.cls }}" onClick="{{ m.onSelect }}"
-                        style-hover="border-color:var(--brand)">
-                        <div class="selmod-v2-accent" style="background:{{ m.accent }}"><svg class="ic ic18"
-                            style="color:rgba(255,255,255,.85)">
-                            <use href="#i-tag"></use>
-                          </svg></div>
-                        <div class="selmod-v2-info">
-                          <div class="selmod-v2-name">{{ m.name }}</div>
-                          <div class="selmod-v2-desc">{{ m.desc }}</div>
-                          <div class="selmod-v2-fields"><sc-for list="{{ m.ftags }}" as="ft"
-                              hint-placeholder-count="2"><span class="selmod-v2-ftag">{{ ft.name }}</span></sc-for>
+                    <div class="ec-prev-card">
+                      <div class="lprev-title"><span>Vista previa</span><sc-if value="{{ etiqHasSel }}"
+                          hint-placeholder-val="{{ false }}"><span
+                            style="font-size:11px;color:var(--t3);font-weight:400;letter-spacing:0">Toca un campo para
+                            editarlo</span></sc-if></div><sc-if value="{{ etiqHasSel }}"
+                        hint-placeholder-val="{{ false }}">
+                        <div class="ec-prev-stage">
+                          <div class="ec-prev-inner">
+                            <div style="{{ ecRenderStyle }}"><sc-if value="{{ ecHasAbove }}"
+                                hint-placeholder-val="{{ false }}">
+                                <div class="lr-body" style="padding-bottom:8px"><sc-for list="{{ ecRowsAbove }}"
+                                    as="row" hint-placeholder-count="0"><sc-if value="{{ row.showDivider }}"
+                                      hint-placeholder-val="{{ false }}">
+                                      <div style="{{ ecDivStyle }}"></div>
+                                    </sc-if>
+                                    <div class="lr-row" style="{{ row.rowStyle }}"><sc-for list="{{ row.fields }}"
+                                        as="f" hint-placeholder-count="1">
+                                        <div class="lr-field ec-field" onClick="{{ f.onOpenField }}">
+                                          <div class="lr-lbl" style="{{ ecLabelStyle }}">{{ f.label }}</div><sc-if
+                                            value="{{ f.hasValue }}" hint-placeholder-val="{{ false }}">
+                                            <div class="lr-val" style="{{ ecValueStyle }}">{{ f.value }}</div>
+                                          </sc-if><sc-if value="{{ f.noValue }}" hint-placeholder-val="{{ true }}">
+                                            <div class="lr-val" style="{{ ecValueStyle }}"><span class="ec-val-empty"
+                                                style="color:{{ ecHeaderBg }}"></span></div>
+                                          </sc-if><sc-if value="{{ f.isOpen }}" hint-placeholder-val="{{ false }}">
+                                            <div class="ec-field-backdrop" onClick="{{ f.onCancelField }}"></div>
+                                            <div class="ec-field-modal" onClick="{{ f.stopProp }}">
+                                              <div class="ec-fm-head">
+                                                <div class="ec-fm-ico"><svg class="ic ic18">
+                                                    <use href="#i-pencil"></use>
+                                                  </svg></div>
+                                                <div>
+                                                  <div class="ec-fm-title">{{ f.label }}</div>
+                                                  <div class="ec-fm-sub">Introduce el valor para este campo</div>
+                                                </div>
+                                              </div><input class="ec-fm-input" type="{{ f.inputType }}"
+                                                value="{{ f.draft }}" onInput="{{ f.onDraftInput }}"
+                                                autoFocus="{{ true }}">
+                                              <div class="ec-fm-actions"><button class="btn btn-ghost f1"
+                                                  onClick="{{ f.onCancelField }}"
+                                                  style-hover="background:var(--bg)">Cancelar</button><button
+                                                  class="btn btn-primary f1" onClick="{{ f.onSaveField }}"
+                                                  style-hover="filter:brightness(.94)">Guardar</button></div>
+                                            </div>
+                                          </sc-if>
+                                        </div>
+                                      </sc-for></div>
+                                  </sc-for></div>
+                              </sc-if>
+                              <div class="lr-header" style="background:{{ ecHeaderBg }}"><sc-if value="{{ ecLogoLeft }}"
+                                  hint-placeholder-val="{{ false }}">
+                                  <div class="lr-logo-ph">LOGO</div>
+                                </sc-if><span class="lr-namelbl">Nombre del producto</span><sc-if
+                                  value="{{ ecLogoRight }}" hint-placeholder-val="{{ false }}">
+                                  <div class="lr-logo-ph">LOGO</div>
+                                </sc-if></div>
+                              <div class="lr-namebar" style="background:{{ ecHeaderBg }}">
+                                <div class="lr-namebar-text">{{ ecProdName }}</div>
+                              </div><sc-if value="{{ ecHasBelow }}" hint-placeholder-val="{{ false }}">
+                                <div class="lr-body" style="padding-top:8px"><sc-for list="{{ ecRowsBelow }}" as="row"
+                                    hint-placeholder-count="0"><sc-if value="{{ row.showDivider }}"
+                                      hint-placeholder-val="{{ false }}">
+                                      <div style="{{ ecDivStyle }}"></div>
+                                    </sc-if>
+                                    <div class="lr-row" style="{{ row.rowStyle }}"><sc-for list="{{ row.fields }}"
+                                        as="f" hint-placeholder-count="1">
+                                        <div class="lr-field ec-field" onClick="{{ f.onOpenField }}">
+                                          <div class="lr-lbl" style="{{ ecLabelStyle }}">{{ f.label }}</div><sc-if
+                                            value="{{ f.hasValue }}" hint-placeholder-val="{{ false }}">
+                                            <div class="lr-val" style="{{ ecValueStyle }}">{{ f.value }}</div>
+                                          </sc-if><sc-if value="{{ f.noValue }}" hint-placeholder-val="{{ true }}">
+                                            <div class="lr-val" style="{{ ecValueStyle }}"><span class="ec-val-empty"
+                                                style="color:{{ ecHeaderBg }}"></span></div>
+                                          </sc-if><sc-if value="{{ f.isOpen }}" hint-placeholder-val="{{ false }}">
+                                            <div class="ec-field-backdrop" onClick="{{ f.onCancelField }}"></div>
+                                            <div class="ec-field-modal" onClick="{{ f.stopProp }}">
+                                              <div class="ec-fm-head">
+                                                <div class="ec-fm-ico"><svg class="ic ic18">
+                                                    <use href="#i-pencil"></use>
+                                                  </svg></div>
+                                                <div>
+                                                  <div class="ec-fm-title">{{ f.label }}</div>
+                                                  <div class="ec-fm-sub">Introduce el valor para este campo</div>
+                                                </div>
+                                              </div><input class="ec-fm-input" type="{{ f.inputType }}"
+                                                value="{{ f.draft }}" onInput="{{ f.onDraftInput }}"
+                                                autoFocus="{{ true }}">
+                                              <div class="ec-fm-actions"><button class="btn btn-ghost f1"
+                                                  onClick="{{ f.onCancelField }}"
+                                                  style-hover="background:var(--bg)">Cancelar</button><button
+                                                  class="btn btn-primary f1" onClick="{{ f.onSaveField }}"
+                                                  style-hover="filter:brightness(.94)">Guardar</button></div>
+                                            </div>
+                                          </sc-if>
+                                        </div>
+                                      </sc-for></div>
+                                  </sc-for></div>
+                              </sc-if>
+                            </div>
                           </div>
                         </div>
-                        <div class="selmod-v2-check"><sc-if value="{{ m.isSelected }}"
-                            hint-placeholder-val="{{ false }}">
-                            <div class="icb icb28" style="background:var(--brand);flex-shrink:0"><svg class="ic ic14"
-                                style="color:#fff">
-                                <use href="#i-check"></use>
-                              </svg></div>
-                          </sc-if></div>
-                      </button></sc-for></div>
-                  <sc-if value="{{ etiqModeloHasPager }}" hint-placeholder-val="{{ false }}">
-                    <div class="prod-pager"><button class="prod-pager-btn" onClick="{{ etiqModeloPrevPage }}"
-                        disabled="{{ etiqModeloPrevDis }}"><svg class="ic ic14" style="transform:rotate(90deg)">
-                          <use href="#i-chevron-down"></use>
-                        </svg><span>Anterior</span></button>
-                      <div class="prod-pager-dots"><sc-for list="{{ etiqModeloPageDots }}" as="d"
-                          hint-placeholder-count="2">
-                          <div class="{{ d.cls }}"></div>
-                        </sc-for></div><button class="prod-pager-btn" onClick="{{ etiqModeloNextPage }}"
-                        disabled="{{ etiqModeloNextDis }}"><span>Siguiente</span><svg class="ic ic14"
-                          style="transform:rotate(-90deg)">
-                          <use href="#i-chevron-down"></use>
-                        </svg></button>
+                      </sc-if><sc-if value="{{ etiqNoSel }}" hint-placeholder-val="{{ true }}">
+                        <div class="etiq-empty-prev" style="margin-top:6px"><svg class="ic ic28">
+                            <use href="#i-tag"></use>
+                          </svg>Selecciona un producto y un modelo<br>para previsualizar la etiqueta</div>
+                      </sc-if>
                     </div>
-                  </sc-if>
+                  </div>
+                  <div class="ec-actions"><sc-if value="{{ isEtiqEdit }}" hint-placeholder-val="{{ false }}"><button
+                        class="btn ec-btn-danger" onClick="{{ onDeleteEtiq }}"
+                        style-hover="background:#fdeaea;border-color:var(--red)"><svg class="ic ic18">
+                          <use href="#i-trash"></use>
+                        </svg><span>Eliminar</span></button></sc-if>
+                    <div class="ec-actions-right"><button class="btn btn-ghost" onClick="{{ cancelCrearEtiq }}"
+                        style-hover="background:var(--bg)">Cancelar</button><sc-if value="{{ etiqHasSel }}"
+                        hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ onPdfEtiq }}"
+                          style-hover="background:var(--bg)"><svg class="ic ic18">
+                            <use href="#i-archive"></use>
+                          </svg><span>Descargar PDF</span></button><button class="btn btn-ghost"
+                          onClick="{{ onPrintEtiq }}" style-hover="background:var(--bg)"><svg class="ic ic18">
+                            <use href="#i-printer"></use>
+                          </svg><span>Imprimir</span></button><button class="btn btn-primary" onClick="{{ onSaveEtiq }}"
+                          style-hover="filter:brightness(.94)"><svg class="ic ic18">
+                            <use href="#i-check"></use>
+                          </svg><span>{{ ecPrimaryLabel }}</span></button></sc-if></div>
+                  </div>
+                  <div class="ec-bottomrow">
+                    <div class="etiq-creator-col">
+                      <div class="etiq-sec-title"><svg class="ic ic16">
+                          <use href="#i-salad"></use>
+                        </svg>1. Selecciona un producto</div>
+                      <div class="etiq-creator-search"><svg class="ic ic14" style="color:var(--t3);flex-shrink:0">
+                          <use href="#i-search"></use>
+                        </svg><input placeholder="Buscar producto..." value="{{ etiqCreatorSearchVal }}"
+                          onInput="{{ setEtiqCreatorSearch }}"></div>
+                      <div class="etiq-creator-cats"><sc-for list="{{ etiqCreatorCatChips }}" as="cc"
+                          hint-placeholder-count="4"><button class="etiq-cc-chip {{ cc.cls }}"
+                            onClick="{{ cc.onClick }}">{{
+                            cc.name }}</button></sc-for></div>
+                      <div class="prod-page-grid"><sc-for list="{{ etiqProdItems }}" as="p"
+                          hint-placeholder-count="6"><button class="{{ p.cls }}" onClick="{{ p.onSelect }}"
+                            style-hover="border-color:var(--brand)">
+                            <div class="icb icb34" style="background:{{ p.color }};flex-shrink:0"><svg class="ic ic16">
+                                <use href="{{ p.icon }}"></use>
+                              </svg></div>
+                            <div style="text-align:left;min-width:0;overflow:hidden">
+                              <div class="selprod-name">{{ p.name }}</div>
+                              <div class="selprod-cat">{{ p.catName }}</div>
+                            </div>
+                          </button></sc-for></div>
+                      <sc-if value="{{ etiqProdHasPager }}" hint-placeholder-val="{{ false }}">
+                        <div class="prod-pager"><button class="prod-pager-btn" onClick="{{ etiqProdPrevPage }}"
+                            disabled="{{ etiqProdPrevDis }}"><svg class="ic ic14" style="transform:rotate(90deg)">
+                              <use href="#i-chevron-down"></use>
+                            </svg><span>Anterior</span></button>
+                          <div class="prod-pager-dots"><sc-for list="{{ etiqProdPageDots }}" as="d"
+                              hint-placeholder-count="2">
+                              <div class="{{ d.cls }}"></div>
+                            </sc-for></div><button class="prod-pager-btn" onClick="{{ etiqProdNextPage }}"
+                            disabled="{{ etiqProdNextDis }}"><span>Siguiente</span><svg class="ic ic14"
+                              style="transform:rotate(-90deg)">
+                              <use href="#i-chevron-down"></use>
+                            </svg></button>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <div class="etiq-creator-col">
+                      <div class="etiq-sec-title"><svg class="ic ic16">
+                          <use href="#i-tag"></use>
+                        </svg>2. Selecciona un modelo</div>
+                      <div class="etiq-creator-search"><svg class="ic ic14" style="color:var(--t3);flex-shrink:0">
+                          <use href="#i-search"></use>
+                        </svg><input placeholder="Buscar modelo..." value="{{ etiqModeloSearchVal }}"
+                          onInput="{{ setEtiqModeloSearch }}"></div>
+                      <div style="display:flex;flex-direction:column;gap:9px"><sc-for list="{{ etiqModeloItems }}"
+                          as="m" hint-placeholder-count="4"><button class="{{ m.cls }}" onClick="{{ m.onSelect }}"
+                            style-hover="border-color:var(--brand)">
+                            <div class="selmod-v2-accent" style="background:{{ m.accent }}"><svg class="ic ic18"
+                                style="color:rgba(255,255,255,.85)">
+                                <use href="#i-tag"></use>
+                              </svg></div>
+                            <div class="selmod-v2-info">
+                              <div class="selmod-v2-name">{{ m.name }}</div>
+                              <div class="selmod-v2-desc">{{ m.desc }}</div>
+                              <div class="selmod-v2-fields"><sc-for list="{{ m.ftags }}" as="ft"
+                                  hint-placeholder-count="2"><span class="selmod-v2-ftag">{{ ft.name }}</span></sc-for>
+                              </div>
+                            </div>
+                            <div class="selmod-v2-check"><sc-if value="{{ m.isSelected }}"
+                                hint-placeholder-val="{{ false }}">
+                                <div class="icb icb28" style="background:var(--brand);flex-shrink:0"><svg
+                                    class="ic ic14" style="color:#fff">
+                                    <use href="#i-check"></use>
+                                  </svg></div>
+                              </sc-if></div>
+                          </button></sc-for></div>
+                      <sc-if value="{{ etiqModeloHasPager }}" hint-placeholder-val="{{ false }}">
+                        <div class="prod-pager"><button class="prod-pager-btn" onClick="{{ etiqModeloPrevPage }}"
+                            disabled="{{ etiqModeloPrevDis }}"><svg class="ic ic14" style="transform:rotate(90deg)">
+                              <use href="#i-chevron-down"></use>
+                            </svg><span>Anterior</span></button>
+                          <div class="prod-pager-dots"><sc-for list="{{ etiqModeloPageDots }}" as="d"
+                              hint-placeholder-count="2">
+                              <div class="{{ d.cls }}"></div>
+                            </sc-for></div><button class="prod-pager-btn" onClick="{{ etiqModeloNextPage }}"
+                            disabled="{{ etiqModeloNextDis }}"><span>Siguiente</span><svg class="ic ic14"
+                              style="transform:rotate(-90deg)">
+                              <use href="#i-chevron-down"></use>
+                            </svg></button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </sc-if>
             </div>
           </sc-if>
-        </div></sc-if>
 
-    </div>
-    <nav class="mobile-nav"><sc-for list="{{ nav }}" as="item"><button class="mobile-navitem {{ item.cls }}" onClick="{{ item.onClick }}"><svg class="ic ic22"><use href="{{ item.icon }}"></use></svg><span>{{ item.short }}</span></button></sc-for></nav>
-    </main>
+        </div>
+        <nav class="mobile-nav"><sc-for list="{{ nav }}" as="item"><button class="mobile-navitem {{ item.cls }}"
+              onClick="{{ item.onClick }}"><svg class="ic ic22">
+                <use href="{{ item.icon }}"></use>
+              </svg><span>{{ item.short }}</span></button></sc-for></nav>
+      </main>
     </div>
   </x-dc>
   <script type="text/x-dc" data-dc-script
     data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#2F9CF5&quot;,&quot;options&quot;:[&quot;#2F9CF5&quot;,&quot;#5558C9&quot;,&quot;#22C55E&quot;,&quot;#FF8D28&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tema&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Cómodo&quot;,&quot;options&quot;:[&quot;Cómodo&quot;,&quot;Compacto&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tema&quot;},&quot;showStats&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Categorías&quot;}}">
 class Component extends DCLogic {
   state = {
-    screen: 'etiquetas',
+    screen: 'categorias',
     productFilter: 'todas',
     kitchenOpen: false,
     kitchen: 'Cocina 1',
