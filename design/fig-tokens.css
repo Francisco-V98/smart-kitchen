@@ -1,0 +1,124 @@
+/* Generated from Figma Variables. First mode = :root default.
+   FLOAT tokens are unitless — multiply by 1px in calc() where a length is needed. */
+
+:root {
+  --accents-green: rgb(52,199,89); /* @kind color */
+  --accents-orange: rgb(255,141,40); /* @kind color */
+  --accents-yellow: rgb(255,204,0); /* @kind color */
+  --backgrounds-primary: rgb(255,255,255); /* @kind color */
+  --bg-overlay: var(--gray-900); /* @kind color */
+  --bg-page: var(--white); /* @kind color */
+  --bg-subtle: var(--gray-100); /* @kind color */
+  --bg-surface: var(--gray-50); /* @kind color */
+  --blue-300: rgb(149,209,230); /* @kind color */
+  --blue-400: rgb(50,163,255); /* @kind color */
+  --blue-500: rgb(47,156,245); /* @kind color */
+  --blue-50: rgb(239,248,251); /* @kind color */
+  --border-1: 1;
+  --border-2: 2;
+  --border-brand: var(--blue-500); /* @kind color */
+  --border-default: var(--gray-300); /* @kind color */
+  --border-strong: var(--gray-500); /* @kind color */
+  --brand-gradient-end: var(--purple-600); /* @kind color */
+  --brand-gradient-start: var(--blue-400); /* @kind color */
+  --brand-primary-light: var(--blue-300); /* @kind color */
+  --brand-primary: var(--blue-500); /* @kind color */
+  --brand-surface: var(--blue-50); /* @kind color */
+  --color-brand-accent: rgb(250,112,28); /* @kind color */
+  --color-brand-primary-hover: rgb(3,97,209); /* @kind color */
+  --color-brand-primary: rgb(5,120,245); /* @kind color */
+  --color-neutral-100: rgb(241,243,247); /* @kind color */
+  --color-neutral-200: rgb(226,230,236); /* @kind color */
+  --color-neutral-400: rgb(156,163,175); /* @kind color */
+  --color-neutral-50: rgb(249,250,252); /* @kind color */
+  --color-neutral-600: rgb(95,101,113); /* @kind color */
+  --color-neutral-900: rgb(17,24,39); /* @kind color */
+  --color-status-danger: rgb(239,68,68); /* @kind color */
+  --color-status-success: rgb(16,185,120); /* @kind color */
+  --color-status-warning: rgb(249,183,13); /* @kind color */
+  --color-surface-bg: rgb(244,246,249); /* @kind color */
+  --color-surface-sidebar: rgb(16,21,36); /* @kind color */
+  --color-surface-white: rgb(255,255,255); /* @kind color */
+  --gray-100: rgb(243,244,246); /* @kind color */
+  --gray-300: rgb(209,213,219); /* @kind color */
+  --gray-500: rgb(107,114,128); /* @kind color */
+  --gray-50: rgb(249,250,251); /* @kind color */
+  --gray-700: rgb(55,65,81); /* @kind color */
+  --gray-900: rgb(17,24,39); /* @kind color */
+  --grays-gray: rgb(142,142,147); /* @kind color */
+  --green-500: rgb(34,197,94); /* @kind color */
+  --green-50: rgb(240,253,244); /* @kind color */
+  --purple-600: rgb(85,88,201); /* @kind color */
+  --radius-2xl: 24;
+  --radius-full-2: 999;
+  --radius-full: 9999;
+  --radius-lg-2: 12;
+  --radius-lg: 12;
+  --radius-md-2: 8;
+  --radius-md: 8;
+  --radius-none: 0;
+  --radius-sm-2: 6;
+  --radius-sm: 6;
+  --radius-xl-2: 16;
+  --radius-xl: 16;
+  --radius-xs: 4;
+  --red-500: rgb(239,68,68); /* @kind color */
+  --red-50: rgb(254,242,242); /* @kind color */
+  --spacing-10: 40;
+  --spacing-12-2: 12;
+  --spacing-12: 48;
+  --spacing-16-2: 16;
+  --spacing-16: 64;
+  --spacing-1: 4;
+  --spacing-2-2: 2;
+  --spacing-20: 20;
+  --spacing-24: 24;
+  --spacing-2: 8;
+  --spacing-32: 32;
+  --spacing-3: 12;
+  --spacing-4-2: 4;
+  --spacing-40: 40;
+  --spacing-48: 48;
+  --spacing-4: 16;
+  --spacing-5: 20;
+  --spacing-6-2: 6;
+  --spacing-64: 64;
+  --spacing-6: 24;
+  --spacing-8-2: 8;
+  --spacing-8: 32;
+  --status-error-surface: var(--red-50); /* @kind color */
+  --status-error: var(--red-500); /* @kind color */
+  --status-success-surface: var(--green-50); /* @kind color */
+  --status-success: var(--green-500); /* @kind color */
+  --status-warning-surface: var(--yellow-50); /* @kind color */
+  --status-warning: var(--yellow-500); /* @kind color */
+  --text-brand: var(--blue-500); /* @kind color */
+  --text-inverse: var(--white); /* @kind color */
+  --text-muted: var(--gray-500); /* @kind color */
+  --text-primary: var(--gray-900); /* @kind color */
+  --text-secondary: var(--gray-700); /* @kind color */
+  --white: rgb(255,255,255); /* @kind color */
+  --yellow-500: rgb(234,179,8); /* @kind color */
+  --yellow-50: rgb(254,252,232); /* @kind color */
+}
+
+:root[data-theme="dark"], .dark {
+  --accents-green: rgb(48,209,88); /* @kind color */
+  --accents-green: rgb(74,233,104); /* @kind color */
+  --accents-orange: rgb(255,146,48); /* @kind color */
+  --accents-orange: rgb(255,160,86); /* @kind color */
+  --accents-yellow: rgb(254,223,67); /* @kind color */
+  --accents-yellow: rgb(255,214,0); /* @kind color */
+  --backgrounds-primary: rgb(0,0,0); /* @kind color */
+  --backgrounds-primary: rgb(0,0,0); /* @kind color */
+  --grays-gray: rgb(142,142,147); /* @kind color */
+  --grays-gray: rgb(174,174,178); /* @kind color */
+}
+
+:root[data-theme="light"], .light {
+  --accents-green: rgb(0,137,50); /* @kind color */
+  --accents-orange: rgb(197,83,0); /* @kind color */
+  --accents-yellow: rgb(161,106,0); /* @kind color */
+  --backgrounds-primary: rgb(255,255,255); /* @kind color */
+  --grays-gray: rgb(108,108,112); /* @kind color */
+}
