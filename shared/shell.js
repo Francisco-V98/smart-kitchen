@@ -26,7 +26,9 @@
     }).join('');
     return '' +
       '<div class="brand"><div class="brandmark"><svg class="ic ic24"><use href="#i-chef"></use></svg></div>' +
-      '<div><div class="brandname">Kotania</div><div class="brandsub">Smart Kitchen</div></div></div>' +
+      '<div><div class="brandname">Kotania</div><div class="brandsub">Smart Kitchen</div></div>' +
+      '<button type="button" class="sb-close" id="sb-close-btn" aria-label="Cerrar menú">' +
+      '<svg class="ic ic18"><use href="#i-x"></use></svg></button></div>' +
       '<div class="navlabel">Etiqueta</div>' + items +
       '<div class="navlabel">Registros</div>' +
       '<div class="navitem soon"><svg class="ic ic20"><use href="#i-printer"></use></svg><span>Etiquetas impresas</span><span class="soonpill">PRONTO</span></div>' +
@@ -35,13 +37,6 @@
       '<div class="usercard"><div class="avatar av36">AR</div>' +
       '<div><div class="uc-name">Ana Ruiz</div><div class="uc-role">Chef · <span id="shell-kitchen-name">' + esc(Store.getKitchen()) + '</span></div></div>' +
       '<button class="ucbtn"><svg class="ic ic18"><use href="#i-settings"></use></svg></button></div>';
-  }
-
-  function mobileNavHTML() {
-    return NAV.map(function (n) {
-      return '<a class="mobile-navitem ' + (n.id === active ? 'on' : '') + '" href="' + n.href + '">' +
-        '<svg class="ic ic22"><use href="' + n.icon + '"></use></svg><span>' + esc(n.short) + '</span></a>';
-    }).join('');
   }
 
   function kmenuHTML() {
@@ -54,6 +49,8 @@
 
   function topbarHTML(crumb) {
     return '' +
+      '<button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Abrir menú">' +
+      '<svg class="ic ic20"><use href="#i-menu"></use></svg></button>' +
       '<div class="crumb">' + esc(crumb) + '</div>' +
       '<div class="tbr">' +
       '<div class="kpick"><button class="kbtn" id="shell-kbtn"><span id="shell-kbtn-label">' + esc(Store.getKitchen()) + '</span>' +
@@ -99,6 +96,24 @@
     document.addEventListener('click', function () { kmenu.style.display = 'none'; });
   }
 
+  function wireDrawer() {
+    var sidebar = document.getElementById('sidebar');
+    var hamburger = document.getElementById('hamburger-btn');
+    var closeBtn = document.getElementById('sb-close-btn');
+    var backdrop = document.getElementById('sb-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.className = 'sb-backdrop';
+      backdrop.id = 'sb-backdrop';
+      document.body.appendChild(backdrop);
+    }
+    function open() { sidebar.classList.add('open'); backdrop.classList.add('open'); }
+    function close() { sidebar.classList.remove('open'); backdrop.classList.remove('open'); }
+    hamburger.addEventListener('click', function (e) { e.stopPropagation(); open(); });
+    closeBtn.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+  }
+
   var Shell = {
     mount: function (opts) {
       active = opts.active;
@@ -106,7 +121,7 @@
       var topbar = document.getElementById('topbar');
       topbar.innerHTML = topbarHTML(opts.crumb || '');
       wireTopbar(topbar);
-      document.getElementById('mobile-nav').innerHTML = mobileNavHTML();
+      wireDrawer();
       this.setHead(opts);
     },
     setHead: function (opts) {
