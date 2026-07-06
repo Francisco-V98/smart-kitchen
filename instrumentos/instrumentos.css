@@ -1,0 +1,67 @@
+.instgrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          gap: 16px
+        }
+
+.instcard {
+          background: #fff;
+          border: 1px solid var(--line);
+          border-radius: 18px;
+          padding: 18px;
+          box-shadow: var(--sh-sm);
+          transition: all .18s;
+          display: flex;
+          flex-direction: column;
+          gap: 0
+        }
+
+.instcard-top {
+          display: flex;
+          align-items: flex-start;
+          gap: 13px
+        }
+
+.instcard-info {
+          flex: 1;
+          min-width: 0
+        }
+
+.instname {
+          font-size: 15.5px;
+          font-weight: 700;
+          color: var(--t1);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap
+        }
+
+.instmeta {
+          font-size: 12.5px;
+          color: var(--t3);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-top: 5px
+        }
+
+.instnotes {
+          font-size: 13px;
+          color: var(--t3);
+          margin-top: 10px;
+          padding-top: 12px;
+          border-top: 1px solid var(--line);
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          line-height: 1.4
+        }
+
+@media (max-width: 768px) {
+
+  .instgrid {
+              grid-template-columns: 1fr
+            }
+
+}

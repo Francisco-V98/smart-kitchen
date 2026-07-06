@@ -1,0 +1,45 @@
+.areagrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(214px, 1fr));
+          gap: 18px
+        }
+
+.areacard {
+          background: #fff;
+          border: 1px solid var(--line);
+          border-radius: 18px;
+          padding: 20px;
+          box-shadow: var(--sh-sm);
+          transition: all .18s
+        }
+
+.areacard-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 17px
+        }
+
+.areaname {
+          font-size: 16.5px;
+          font-weight: 700;
+          color: var(--t1);
+          margin-bottom: 9px
+        }
+
+.areameta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          color: var(--t3)
+        }
+
+@media (max-width: 768px) {
+
+  .areagrid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 12px
+            }
+
+}

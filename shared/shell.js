@@ -4,11 +4,20 @@
 (function () {
   'use strict';
 
-  var NAV = [
-    { id: 'etiquetas', name: 'Etiquetas', short: 'Etiquetas', icon: '#i-tag', href: '../etiquetas/index.html' },
-    { id: 'categorias', name: 'Categorías', short: 'Categorías', icon: '#i-grid', href: '../categorias/index.html' },
-    { id: 'productos', name: 'Productos', short: 'Productos', icon: '#i-salad', href: '../productos/index.html' },
-    { id: 'procesos', name: 'Modelos de etiqueta', short: 'Modelos', icon: '#i-utensils', href: '../procesos/index.html' },
+  var NAV_GROUPS = [
+    { label: 'Etiqueta', items: [
+      { id: 'etiquetas', name: 'Etiquetas', icon: '#i-tag', href: '../etiquetas/index.html' },
+      { id: 'categorias', name: 'Categorías', icon: '#i-grid', href: '../categorias/index.html' },
+      { id: 'productos', name: 'Productos', icon: '#i-salad', href: '../productos/index.html' },
+      { id: 'procesos', name: 'Modelos de etiqueta', icon: '#i-utensils', href: '../procesos/index.html' },
+    ] },
+    { label: 'Registro de acciones', items: [
+      { id: 'calendario', name: 'Calendario', icon: '#i-calendar', href: '../calendario/index.html' },
+      { id: 'labores', name: 'Labores', icon: '#i-clipboard', href: '../labores/index.html' },
+      { id: 'areas', name: 'Áreas', icon: '#i-map-pin', href: '../areas/index.html' },
+      { id: 'instrumentos', name: 'Instrumentos', icon: '#i-wrench', href: '../instrumentos/index.html' },
+      { id: 'personal', name: 'Personal', icon: '#i-users', href: '../personal/index.html' },
+    ] },
   ];
 
   function esc(s) {
@@ -20,16 +29,19 @@
   var active = null;
 
   function sidebarHTML() {
-    var items = NAV.map(function (n) {
-      return '<a class="navitem ' + (n.id === active ? 'on' : '') + '" href="' + n.href + '">' +
-        '<svg class="ic ic20"><use href="' + n.icon + '"></use></svg><span>' + esc(n.name) + '</span></a>';
+    var groupsHTML = NAV_GROUPS.map(function (g) {
+      var items = g.items.map(function (n) {
+        return '<a class="navitem ' + (n.id === active ? 'on' : '') + '" href="' + n.href + '">' +
+          '<svg class="ic ic20"><use href="' + n.icon + '"></use></svg><span>' + esc(n.name) + '</span></a>';
+      }).join('');
+      return '<div class="navlabel">' + esc(g.label) + '</div>' + items;
     }).join('');
     return '' +
       '<div class="brand"><div class="brandmark"><svg class="ic ic24"><use href="#i-chef"></use></svg></div>' +
       '<div><div class="brandname">Kotania</div><div class="brandsub">Smart Kitchen</div></div>' +
       '<button type="button" class="sb-close" id="sb-close-btn" aria-label="Cerrar menú">' +
       '<svg class="ic ic18"><use href="#i-x"></use></svg></button></div>' +
-      '<div class="navlabel">Etiqueta</div>' + items +
+      groupsHTML +
       '<div class="navlabel">Registros</div>' +
       '<div class="navitem soon"><svg class="ic ic20"><use href="#i-printer"></use></svg><span>Etiquetas impresas</span><span class="soonpill">PRONTO</span></div>' +
       '<div class="navitem soon"><svg class="ic ic20"><use href="#i-clock"></use></svg><span>Caducidades</span><span class="soonpill">PRONTO</span></div>' +

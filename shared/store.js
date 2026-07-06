@@ -6,6 +6,12 @@
 
   var STORAGE_KEY = 'kotania.data.v1';
 
+  function isoOffset(days) {
+    var d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
   var SEED = {
     kitchen: 'Cocina 1',
     cats: [
@@ -46,14 +52,91 @@
       { id: 'e5', prodId: 'p9', modelId: 'm1', vals: { 'efb-0-0': '2025-06-19', 'efb-0-1': '2025-06-26', 'efb-1-0': '3 °C', 'efb-1-1': 'Luis Pérez' }, date: '21/06/2025', printCount: 4 },
       { id: 'e6', prodId: 'p12', modelId: 'm3', vals: { 'efb-0-0': '2025-06-20', 'efb-0-1': '13:40' }, date: '20/06/2025', printCount: 2 },
     ],
+
+    areas: [
+      { id: 'almacen', name: 'Almacén', color: '#5558C9', icon: '#i-archive' },
+      { id: 'cocina', name: 'Cocina', color: '#FF8D28', icon: '#i-flame' },
+      { id: 'comedor', name: 'Comedor', color: '#22C55E', icon: '#i-utensils' },
+      { id: 'banos', name: 'Baños', color: '#0EA5E9', icon: '#i-droplet' },
+    ],
+    instrumentos: [
+      { id: 'nevera1', name: 'Nevera 1', areaId: 'cocina', icon: '#i-snow', notes: 'Refrigerador principal de cocina' },
+      { id: 'nevera2', name: 'Nevera 2', areaId: 'cocina', icon: '#i-snow', notes: '' },
+      { id: 'congelador1', name: 'Congelador 1', areaId: 'almacen', icon: '#i-snow', notes: 'Conservación -18°C' },
+      { id: 'freidora1', name: 'Freidora', areaId: 'cocina', icon: '#i-flame', notes: '' },
+      { id: 'licuadora1', name: 'Licuadora industrial', areaId: 'cocina', icon: '#i-package', notes: '' },
+    ],
+    personal: [
+      { id: 'ana', name: 'Ana Ruiz', role: 'Chef' },
+      { id: 'luis', name: 'Luis Pérez', role: 'Ayudante de cocina' },
+    ],
+    labores: [
+      {
+        id: 'lab1', name: 'Revisar temperatura de neveras', desc: 'Verificar que las neveras de cocina estén en el rango correcto.',
+        areaId: 'cocina', frequency: 'diaria', startDate: isoOffset(-5), time: '09:00', assigneeId: 'ana',
+        checklist: [
+          { id: 'ci1', label: 'Nevera 1', instrumentoId: 'nevera1', valueType: 'rango', min: 1, max: 4, unit: '°C' },
+          { id: 'ci2', label: 'Nevera 2', instrumentoId: 'nevera2', valueType: 'rango', min: 1, max: 4, unit: '°C' },
+        ],
+      },
+      {
+        id: 'lab2', name: 'Limpiar área de almacén', desc: 'Limpieza general de piso, estanterías y superficies del almacén.',
+        areaId: 'almacen', frequency: 'diaria', startDate: isoOffset(-5), time: '18:00', assigneeId: 'luis',
+        checklist: [
+          { id: 'ci1', label: 'Piso', instrumentoId: null, valueType: 'ninguno' },
+          { id: 'ci2', label: 'Estanterías', instrumentoId: null, valueType: 'ninguno' },
+          { id: 'ci3', label: 'Congelador 1 (exterior)', instrumentoId: 'congelador1', valueType: 'ninguno' },
+        ],
+      },
+      {
+        id: 'lab3', name: 'Revisar aceite de freidoras', desc: 'Comprobar el estado y color del aceite, renovar si es necesario.',
+        areaId: 'cocina', frequency: 'semanal', startDate: isoOffset(-14), time: '11:00', assigneeId: 'ana',
+        checklist: [
+          { id: 'ci1', label: 'Freidora', instrumentoId: 'freidora1', valueType: 'texto' },
+        ],
+      },
+      {
+        id: 'lab4', name: 'Revisión mensual de extintores', desc: 'Verificar presión y fecha de vencimiento de los extintores.',
+        areaId: 'comedor', frequency: 'mensual', startDate: isoOffset(-35), time: '10:00', assigneeId: 'luis',
+        checklist: [
+          { id: 'ci1', label: 'Extintor comedor', instrumentoId: null, valueType: 'ninguno' },
+        ],
+      },
+    ],
+    ejecuciones: [
+      {
+        id: 'ej1', laborId: 'lab1', date: isoOffset(-1), completedBy: 'ana', completedAt: Date.now(),
+        results: [
+          { checklistItemId: 'ci1', value: '3', itemStatus: 'ok' },
+          { checklistItemId: 'ci2', value: '5', itemStatus: 'incidencia' },
+        ],
+        report: 'Nevera 2 marcó 5°C, por encima del rango. Se ajustó el termostato.',
+      },
+      {
+        id: 'ej2', laborId: 'lab2', date: isoOffset(-1), completedBy: 'luis', completedAt: Date.now(),
+        results: [
+          { checklistItemId: 'ci1', value: '', itemStatus: 'ok' },
+          { checklistItemId: 'ci2', value: '', itemStatus: 'ok' },
+          { checklistItemId: 'ci3', value: '', itemStatus: 'ok' },
+        ],
+        report: '',
+      },
+    ],
   };
 
   function load() {
+    var fresh = JSON.parse(JSON.stringify(SEED));
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        // Backfill keys added in later versions so existing saved data doesn't break.
+        Object.keys(fresh).forEach(function (k) {
+          if (parsed[k] === undefined) parsed[k] = fresh[k];
+        });
+        return parsed;
+      }
     } catch (e) { /* corrupt storage, fall back to seed */ }
-    var fresh = JSON.parse(JSON.stringify(SEED));
     persist(fresh);
     return fresh;
   }
@@ -244,7 +327,135 @@
       if (e) { e.printCount = (e.printCount || 0) + n; e.date = todayStr(); save(); }
       return e;
     },
+
+    // ---- áreas ----
+    getAreas: function () {
+      var self = this;
+      return data.areas.map(function (a) {
+        return Object.assign({}, a, { count: self.countInstrumentosInArea(a.id) });
+      });
+    },
+    getArea: function (id) { return data.areas.find(function (a) { return a.id === id; }) || null; },
+    countInstrumentosInArea: function (id) { return data.instrumentos.filter(function (i) { return i.areaId === id; }).length; },
+    addArea: function (a) {
+      var rec = { id: uid('area'), name: a.name, color: a.color, icon: a.icon };
+      data.areas.push(rec); save(); return rec;
+    },
+    updateArea: function (id, patch) {
+      var a = this.getArea(id);
+      if (a) { Object.assign(a, patch); save(); }
+      return a;
+    },
+    deleteArea: function (id) {
+      data.areas = data.areas.filter(function (a) { return a.id !== id; });
+      save();
+    },
+
+    // ---- instrumentos (equipos/herramientas) ----
+    getInstrumentos: function () { return data.instrumentos.slice(); },
+    getInstrumento: function (id) { return data.instrumentos.find(function (i) { return i.id === id; }) || null; },
+    addInstrumento: function (i) {
+      var rec = { id: uid('inst'), name: i.name, areaId: i.areaId, icon: i.icon, notes: i.notes || '' };
+      data.instrumentos.push(rec); save(); return rec;
+    },
+    updateInstrumento: function (id, patch) {
+      var i = this.getInstrumento(id);
+      if (i) { Object.assign(i, patch); save(); }
+      return i;
+    },
+    deleteInstrumento: function (id) {
+      data.instrumentos = data.instrumentos.filter(function (i) { return i.id !== id; });
+      save();
+    },
+
+    // ---- personal ----
+    getPersonalList: function () { return data.personal.slice(); },
+    getPersona: function (id) { return data.personal.find(function (p) { return p.id === id; }) || null; },
+    addPersona: function (p) {
+      var rec = { id: uid('per'), name: p.name, role: p.role || '' };
+      data.personal.push(rec); save(); return rec;
+    },
+    updatePersona: function (id, patch) {
+      var p = this.getPersona(id);
+      if (p) { Object.assign(p, patch); save(); }
+      return p;
+    },
+    deletePersona: function (id) {
+      data.personal = data.personal.filter(function (p) { return p.id !== id; });
+      save();
+    },
+
+    // ---- labores ----
+    getLabores: function () { return data.labores.slice(); },
+    getLabor: function (id) { return data.labores.find(function (l) { return l.id === id; }) || null; },
+    addLabor: function (l) {
+      var rec = Object.assign({ id: uid('lab') }, l);
+      data.labores.push(rec); save(); return rec;
+    },
+    updateLabor: function (id, patch) {
+      var l = this.getLabor(id);
+      if (l) { Object.assign(l, patch); save(); }
+      return l;
+    },
+    deleteLabor: function (id) {
+      data.labores = data.labores.filter(function (l) { return l.id !== id; });
+      data.ejecuciones = data.ejecuciones.filter(function (e) { return e.laborId !== id; });
+      save();
+    },
+
+    // ---- recurrencia + ejecuciones ----
+    todayISO: function () { return isoOffset(0); },
+    isDueOn: function (labor, dateStr) {
+      if (!labor.startDate || dateStr < labor.startDate) return false;
+      var start = new Date(labor.startDate + 'T00:00:00');
+      var date = new Date(dateStr + 'T00:00:00');
+      var msPerDay = 86400000;
+      var daysBetween = Math.round((date - start) / msPerDay);
+      switch (labor.frequency) {
+        case 'diaria': return true;
+        case 'semanal': return daysBetween % 7 === 0;
+        case 'mensual': return sameDayOfPeriod(start, date, 1);
+        case 'trimestral': return sameDayOfPeriod(start, date, 3);
+        case 'anual': return date.getMonth() === start.getMonth() && date.getDate() === start.getDate();
+        default: return false;
+      }
+    },
+    getEjecucion: function (laborId, dateStr) {
+      return data.ejecuciones.find(function (e) { return e.laborId === laborId && e.date === dateStr; }) || null;
+    },
+    saveEjecucion: function (laborId, dateStr, payload) {
+      var existing = this.getEjecucion(laborId, dateStr);
+      if (existing) {
+        Object.assign(existing, payload, { completedAt: Date.now() });
+        save();
+        return existing;
+      }
+      var rec = Object.assign({ id: uid('ej'), laborId: laborId, date: dateStr, completedAt: Date.now() }, payload);
+      data.ejecuciones.push(rec);
+      save();
+      return rec;
+    },
+    deleteEjecucion: function (laborId, dateStr) {
+      data.ejecuciones = data.ejecuciones.filter(function (e) { return !(e.laborId === laborId && e.date === dateStr); });
+      save();
+    },
+    getOccurrencesForDate: function (dateStr) {
+      var self = this;
+      return data.labores.filter(function (l) { return self.isDueOn(l, dateStr); }).map(function (l) {
+        var ej = self.getEjecucion(l.id, dateStr);
+        return { labor: l, date: dateStr, ejecucion: ej, estado: ej ? 'completada' : 'pendiente' };
+      });
+    },
   };
+
+  function sameDayOfPeriod(start, date, monthStep) {
+    if (date < start) return false;
+    var monthsBetween = (date.getFullYear() - start.getFullYear()) * 12 + (date.getMonth() - start.getMonth());
+    if (monthsBetween % monthStep !== 0) return false;
+    var lastDayOfDateMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    var expectedDay = Math.min(start.getDate(), lastDayOfDateMonth);
+    return date.getDate() === expectedDay;
+  }
 
   function todayStr() {
     var d = new Date();
