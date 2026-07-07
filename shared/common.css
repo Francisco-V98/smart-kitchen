@@ -339,7 +339,9 @@ html,
 .editside {
           display: flex;
           flex-direction: column;
-          gap: 18px
+          gap: 18px;
+          position: sticky;
+          top: 24px
         }
 
 .sidecard {
@@ -1374,6 +1376,10 @@ input:checked+.tslider::before {
               grid-template-columns: 1fr
             }
 
+  .editside {
+              position: static !important
+            }
+
   .swatches {
               gap: 8px
             }
@@ -1712,6 +1718,7 @@ input:checked+.tslider::before {
 
 .colstoggle {
           display: flex;
+          flex-wrap: wrap;
           border: 1.5px solid var(--line-2);
           border-radius: 10px;
           overflow: hidden

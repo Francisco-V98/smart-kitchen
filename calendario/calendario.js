@@ -106,7 +106,8 @@
 
     var itemsHTML = occs.map(function (o) {
       var area = o.labor.areaId ? Store.getArea(o.labor.areaId) : null;
-      var assignee = o.labor.assigneeId ? Store.getPersona(o.labor.assigneeId) : null;
+      var names = (o.labor.assigneeIds || []).map(function (id) { var p = Store.getPersona(id); return p ? p.name : null; }).filter(Boolean);
+      var assigneeText = names.length <= 2 ? names.join(', ') : names[0] + ' +' + (names.length - 1) + ' más';
       var alert = hasIncidencia(o);
       var statusClass = alert ? 'incidencia' : o.estado;
       var statusLabel = alert ? 'Con incidencia' : (o.estado === 'completada' ? 'Completada' : 'Pendiente');
@@ -115,7 +116,7 @@
         '<div class="cal-occ-meta">' +
         (area ? '<span class="cal-occ-meta-item"><span class="dot" style="background:' + area.color + '"></span>' + esc(area.name) + '</span>' : '') +
         (o.labor.time ? '<span class="cal-occ-meta-item"><svg class="ic ic12"><use href="#i-clock"></use></svg>' + esc(o.labor.time) + '</span>' : '') +
-        (assignee ? '<span class="cal-occ-meta-item"><svg class="ic ic12"><use href="#i-users"></use></svg>' + esc(assignee.name) + '</span>' : '') +
+        (names.length ? '<span class="cal-occ-meta-item"><svg class="ic ic12"><use href="#i-users"></use></svg>' + esc(assigneeText) + '</span>' : '') +
         '</div></div>' +
         '<span class="cal-status-pill ' + statusClass + '">' + statusLabel + '</span>' +
         '</div>' +
@@ -158,7 +159,7 @@
       var r = execDraft.results[ci.id];
       return { checklistItemId: ci.id, value: r.value, itemStatus: r.itemStatus };
     });
-    Store.saveEjecucion(executing.laborId, executing.date, { results: resultsArr, report: execDraft.report, completedBy: labor.assigneeId || null });
+    Store.saveEjecucion(executing.laborId, executing.date, { results: resultsArr, report: execDraft.report, completedBy: (labor.assigneeIds && labor.assigneeIds[0]) || null });
     view = 'calendar';
     executing = null; execDraft = null;
     render();
@@ -177,9 +178,8 @@
         valueHTML = '<input class="input" type="number" placeholder="Valor registrado" value="' + esc(r.value) + '" data-value-input="' + ci.id + '">' +
           '<div class="exec-item-hint">Rango esperado: ' + esc(ci.min) + '–' + esc(ci.max) + ' ' + esc(ci.unit || '') + '</div>';
       } else if (ci.valueType === 'conteo') {
-        valueHTML = '<input class="input" type="number" placeholder="' + (ci.unit ? esc(ci.unit) : 'Cantidad') + '" value="' + esc(r.value) + '" data-value-input="' + ci.id + '">';
-      } else if (ci.valueType === 'texto') {
-        valueHTML = '<input class="input" type="text" placeholder="Escribe un valor..." value="' + esc(r.value) + '" data-value-input="' + ci.id + '">';
+        valueHTML = '<input class="input" type="number" placeholder="' + (ci.unit ? esc(ci.unit) : 'Cantidad') + '" value="' + esc(r.value) + '" data-value-input="' + ci.id + '">' +
+          (ci.value ? '<div class="exec-item-hint">Valor esperado: ' + esc(ci.value) + ' ' + esc(ci.unit || '') + '</div>' : '');
       }
       return '<div class="exec-item" data-item="' + ci.id + '">' +
         '<div class="exec-item-head">' + (inst ? '<svg class="ic ic18" style="color:var(--brand);flex-shrink:0"><use href="' + inst.icon + '"></use></svg>' : '') +

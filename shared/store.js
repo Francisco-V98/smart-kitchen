@@ -54,6 +54,7 @@
     ],
 
     areas: [
+      { id: 'general', name: 'General', color: '#64748B', icon: '#i-grid' },
       { id: 'almacen', name: 'Almacén', color: '#5558C9', icon: '#i-archive' },
       { id: 'cocina', name: 'Cocina', color: '#FF8D28', icon: '#i-flame' },
       { id: 'comedor', name: 'Comedor', color: '#22C55E', icon: '#i-utensils' },
@@ -73,7 +74,7 @@
     labores: [
       {
         id: 'lab1', name: 'Revisar temperatura de neveras', desc: 'Verificar que las neveras de cocina estén en el rango correcto.',
-        areaId: 'cocina', frequency: 'diaria', startDate: isoOffset(-5), time: '09:00', assigneeId: 'ana',
+        areaId: 'cocina', frequency: 'diaria', startDate: isoOffset(-5), time: '09:00', assigneeIds: ['ana'],
         checklist: [
           { id: 'ci1', label: 'Nevera 1', instrumentoId: 'nevera1', valueType: 'rango', min: 1, max: 4, unit: '°C' },
           { id: 'ci2', label: 'Nevera 2', instrumentoId: 'nevera2', valueType: 'rango', min: 1, max: 4, unit: '°C' },
@@ -81,7 +82,7 @@
       },
       {
         id: 'lab2', name: 'Limpiar área de almacén', desc: 'Limpieza general de piso, estanterías y superficies del almacén.',
-        areaId: 'almacen', frequency: 'diaria', startDate: isoOffset(-5), time: '18:00', assigneeId: 'luis',
+        areaId: 'almacen', frequency: 'diaria', startDate: isoOffset(-5), time: '18:00', assigneeIds: ['luis'],
         checklist: [
           { id: 'ci1', label: 'Piso', instrumentoId: null, valueType: 'ninguno' },
           { id: 'ci2', label: 'Estanterías', instrumentoId: null, valueType: 'ninguno' },
@@ -90,16 +91,23 @@
       },
       {
         id: 'lab3', name: 'Revisar aceite de freidoras', desc: 'Comprobar el estado y color del aceite, renovar si es necesario.',
-        areaId: 'cocina', frequency: 'semanal', startDate: isoOffset(-14), time: '11:00', assigneeId: 'ana',
+        areaId: 'cocina', frequency: 'semanal', weekdays: [0, 3], startDate: isoOffset(-14), time: '11:00', assigneeIds: ['ana', 'luis'],
         checklist: [
-          { id: 'ci1', label: 'Freidora', instrumentoId: 'freidora1', valueType: 'texto' },
+          { id: 'ci1', label: 'Freidora', instrumentoId: 'freidora1', valueType: 'ninguno' },
         ],
       },
       {
-        id: 'lab4', name: 'Revisión mensual de extintores', desc: 'Verificar presión y fecha de vencimiento de los extintores.',
-        areaId: 'comedor', frequency: 'mensual', startDate: isoOffset(-35), time: '10:00', assigneeId: 'luis',
+        id: 'lab4', name: 'Revisión semestral de extintores', desc: 'Verificar presión y fecha de vencimiento de los extintores.',
+        areaId: 'comedor', frequency: 'semestral', startDate: isoOffset(-35), time: '10:00', assigneeIds: ['luis'],
         checklist: [
           { id: 'ci1', label: 'Extintor comedor', instrumentoId: null, valueType: 'ninguno' },
+        ],
+      },
+      {
+        id: 'lab5', name: 'Calibración inicial de balanza', desc: 'Ajuste y calibración única al instalar el equipo.',
+        areaId: 'general', frequency: 'unica', startDate: isoOffset(1), time: '10:00', assigneeIds: ['ana'],
+        checklist: [
+          { id: 'ci1', label: 'Balanza de cocina', instrumentoId: null, valueType: 'conteo', value: 1000, unit: 'g' },
         ],
       },
     ],
@@ -124,8 +132,30 @@
     ],
   };
 
+  // Normalizes data loaded from earlier versions so schema changes (new
+  // fields, renamed fields) don't break saves that already exist.
+  function migrate(d) {
+    if (!d.areas.some(function (a) { return a.id === 'general'; })) {
+      d.areas.unshift({ id: 'general', name: 'General', color: '#64748B', icon: '#i-grid' });
+    }
+    d.labores.forEach(function (l) {
+      if (l.assigneeIds === undefined) {
+        l.assigneeIds = l.assigneeId ? [l.assigneeId] : [];
+        delete l.assigneeId;
+      }
+      // "texto" value type was removed; fall back to a plain status check.
+      (l.checklist || []).forEach(function (ci) {
+        if (ci.valueType === 'texto') {
+          ci.valueType = 'ninguno';
+          delete ci.unit; delete ci.min; delete ci.max; delete ci.value;
+        }
+      });
+    });
+    return d;
+  }
+
   function load() {
-    var fresh = JSON.parse(JSON.stringify(SEED));
+    var fresh = migrate(JSON.parse(JSON.stringify(SEED)));
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -134,7 +164,7 @@
         Object.keys(fresh).forEach(function (k) {
           if (parsed[k] === undefined) parsed[k] = fresh[k];
         });
-        return parsed;
+        return migrate(parsed);
       }
     } catch (e) { /* corrupt storage, fall back to seed */ }
     persist(fresh);
@@ -407,15 +437,19 @@
     todayISO: function () { return isoOffset(0); },
     isDueOn: function (labor, dateStr) {
       if (!labor.startDate || dateStr < labor.startDate) return false;
+      if (labor.frequency === 'unica') return dateStr === labor.startDate;
       var start = new Date(labor.startDate + 'T00:00:00');
       var date = new Date(dateStr + 'T00:00:00');
       var msPerDay = 86400000;
       var daysBetween = Math.round((date - start) / msPerDay);
       switch (labor.frequency) {
         case 'diaria': return true;
-        case 'semanal': return daysBetween % 7 === 0;
+        case 'semanal':
+          if (labor.weekdays && labor.weekdays.length) return labor.weekdays.indexOf((date.getDay() + 6) % 7) !== -1;
+          return daysBetween % 7 === 0;
         case 'mensual': return sameDayOfPeriod(start, date, 1);
         case 'trimestral': return sameDayOfPeriod(start, date, 3);
+        case 'semestral': return sameDayOfPeriod(start, date, 6);
         case 'anual': return date.getMonth() === start.getMonth() && date.getDate() === start.getDate();
         default: return false;
       }

@@ -7,8 +7,29 @@
   var listAreaFilter = null;
   var form = null;
 
-  var FREQ_LABELS = { diaria: 'Diaria', semanal: 'Semanal', mensual: 'Mensual', trimestral: 'Trimestral', anual: 'Anual' };
-  var VALUE_TYPE_LABELS = { ninguno: 'Sin valor', rango: 'Rango', conteo: 'Conteo', texto: 'Texto' };
+  var FREQ_ORDER = ['unica', 'diaria', 'semanal', 'mensual', 'trimestral', 'semestral', 'anual'];
+  var FREQ_LABELS = { unica: 'Una vez', diaria: 'Diaria', semanal: 'Semanal', mensual: 'Mensual', trimestral: 'Trimestral', semestral: 'Semestral', anual: 'Anual' };
+  var VALUE_TYPE_LABELS = { ninguno: 'Sin valor', rango: 'Rango', conteo: 'Conteo' };
+  var WEEKDAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  var CUSTOM_UNIT_ID = '__custom';
+  var UNIT_PRESETS = [
+    { id: '', label: 'Sin unidad' },
+    { id: '°C', label: '°C — temperatura' },
+    { id: '°F', label: '°F — temperatura' },
+    { id: 'kg', label: 'kg — peso' },
+    { id: 'g', label: 'g — peso' },
+    { id: 'lb', label: 'lb — peso' },
+    { id: 'L', label: 'L — volumen' },
+    { id: 'ml', label: 'ml — volumen' },
+    { id: 'cm', label: 'cm — tamaño' },
+    { id: 'm', label: 'm — tamaño' },
+    { id: 'mm', label: 'mm — tamaño' },
+    { id: 'min', label: 'min — tiempo' },
+    { id: 'h', label: 'h — tiempo' },
+    { id: 'seg', label: 'seg — tiempo' },
+    { id: 'uds', label: 'uds — unidades' },
+    { id: '%', label: '% — porcentaje' },
+  ];
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -16,13 +37,14 @@
     });
   }
   function uid() { return 'ci' + Date.now().toString(36) + Math.floor(Math.random() * 1000); }
+  function isPresetUnit(u) { return UNIT_PRESETS.some(function (p) { return p.id === (u || ''); }); }
 
   function newChecklistItem() {
-    return { id: uid(), mode: 'personalizado', instrumentoId: '', label: '', valueType: 'ninguno', min: '', max: '', unit: '' };
+    return { id: uid(), mode: 'personalizado', instrumentoId: '', label: '', valueType: 'ninguno', min: '', max: '', value: '', unit: '', unitMode: 'preset' };
   }
 
   function blankForm() {
-    return { name: '', desc: '', areaId: '', frequency: 'diaria', startDate: Store.todayISO(), time: '', assigneeId: '', checklist: [newChecklistItem()] };
+    return { name: '', desc: '', areaId: '', frequency: 'diaria', weekdays: [], startDate: Store.todayISO(), time: '', assigneeIds: [], checklist: [newChecklistItem()] };
   }
 
   function goList() { view = 'list'; editingId = null; render(); }
@@ -32,9 +54,16 @@
   function openEdit(l) {
     view = 'edit'; editingId = l.id;
     form = {
-      name: l.name, desc: l.desc || '', areaId: l.areaId || '', frequency: l.frequency, startDate: l.startDate, time: l.time || '', assigneeId: l.assigneeId || '',
+      name: l.name, desc: l.desc || '', areaId: l.areaId || '', frequency: l.frequency, weekdays: (l.weekdays || []).slice(),
+      startDate: l.startDate, time: l.time || '', assigneeIds: (l.assigneeIds || []).slice(),
       checklist: JSON.parse(JSON.stringify(l.checklist || [])).map(function (ci) {
-        return Object.assign({ mode: ci.instrumentoId ? 'instrumento' : 'personalizado', instrumentoId: ci.instrumentoId || '', min: ci.min !== undefined ? ci.min : '', max: ci.max !== undefined ? ci.max : '', unit: ci.unit || '' }, ci);
+        var unit = ci.unit || '';
+        return Object.assign({
+          mode: ci.instrumentoId ? 'instrumento' : 'personalizado', instrumentoId: ci.instrumentoId || '',
+          min: ci.min !== undefined ? ci.min : '', max: ci.max !== undefined ? ci.max : '',
+          value: ci.value !== undefined ? ci.value : '', unit: unit,
+          unitMode: (unit && !isPresetUnit(unit)) ? 'custom' : 'preset',
+        }, ci);
       }),
     };
     if (!form.checklist.length) form.checklist.push(newChecklistItem());
@@ -50,14 +79,15 @@
       var label = ci.mode === 'instrumento' ? (Store.getInstrumento(ci.instrumentoId) || {}).name || ci.label : ci.label.trim();
       var rec = { id: ci.id, label: label, instrumentoId: ci.mode === 'instrumento' ? ci.instrumentoId : null, valueType: ci.valueType };
       if (ci.valueType === 'rango') { rec.min = ci.min; rec.max = ci.max; rec.unit = ci.unit; }
-      else if (ci.valueType === 'conteo') { rec.unit = ci.unit; }
+      else if (ci.valueType === 'conteo') { rec.value = ci.value; rec.unit = ci.unit; }
       return rec;
     });
     if (!checklist.length) { alert('Agrega al menos un elemento al checklist.'); return; }
     var payload = {
       name: name, desc: form.desc, areaId: form.areaId || null, frequency: form.frequency,
-      startDate: form.startDate, time: form.time, assigneeId: form.assigneeId || null, checklist: checklist,
+      startDate: form.startDate, time: form.time, assigneeIds: form.assigneeIds, checklist: checklist,
     };
+    if (form.frequency === 'semanal' && form.weekdays.length) payload.weekdays = form.weekdays.slice();
     if (editingId) Store.updateLabor(editingId, payload);
     else Store.addLabor(payload);
     goList();
@@ -83,6 +113,10 @@
     }
   }
 
+  function assigneeNames(l) {
+    return (l.assigneeIds || []).map(function (id) { var p = Store.getPersona(id); return p ? p.name : null; }).filter(Boolean);
+  }
+
   // ---------------- list ----------------
   function renderList() {
     var labores = Store.getLabores();
@@ -98,15 +132,17 @@
 
     var cardsHTML = list.map(function (l) {
       var area = l.areaId ? Store.getArea(l.areaId) : null;
-      var assignee = l.assigneeId ? Store.getPersona(l.assigneeId) : null;
+      var names = assigneeNames(l);
+      var assigneeText = names.length <= 2 ? names.join(', ') : names[0] + ' +' + (names.length - 1) + ' más';
+      var freqText = FREQ_LABELS[l.frequency] + (l.frequency === 'semanal' && l.weekdays && l.weekdays.length ? ' (' + l.weekdays.map(function (w) { return WEEKDAY_LABELS[w]; }).join('/') + ')' : '');
       return '<div class="labcard" data-id="' + l.id + '">' +
         '<div class="labcard-top"><div>' +
         '<div class="labname">' + esc(l.name) + '</div>' +
         (l.desc ? '<div class="labdesc">' + esc(l.desc) + '</div>' : '') +
-        '</div><span class="labfreq-badge">' + FREQ_LABELS[l.frequency] + '</span></div>' +
+        '</div><span class="labfreq-badge">' + esc(freqText) + '</span></div>' +
         '<div class="labmeta">' +
         (area ? '<span class="labmeta-item"><span class="dot" style="background:' + area.color + '"></span>' + esc(area.name) + '</span>' : '') +
-        (assignee ? '<span class="labmeta-item"><svg class="ic ic14"><use href="#i-users"></use></svg>' + esc(assignee.name) + '</span>' : '') +
+        (names.length ? '<span class="labmeta-item"><svg class="ic ic14"><use href="#i-users"></use></svg>' + esc(assigneeText) + '</span>' : '') +
         (l.time ? '<span class="labmeta-item"><svg class="ic ic14"><use href="#i-clock"></use></svg>' + esc(l.time) + '</span>' : '') +
         '<span class="labmeta-item"><svg class="ic ic14"><use href="#i-clipboard"></use></svg>' + l.checklist.length + ' ítems</span>' +
         '</div>' +
@@ -132,26 +168,10 @@
     });
   }
 
-  // ---------------- edit ----------------
-  function areaOptionsHTML() {
-    return '<option value="">Sin área específica</option>' + Store.getAreas().map(function (a) {
-      return '<option value="' + a.id + '"' + (form.areaId === a.id ? ' selected' : '') + '>' + esc(a.name) + '</option>';
-    }).join('');
-  }
-  function personaOptionsHTML() {
-    return '<option value="">Sin asignar</option>' + Store.getPersonalList().map(function (p) {
-      return '<option value="' + p.id + '"' + (form.assigneeId === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>';
-    }).join('');
-  }
-  function instrumentoOptionsHTML(selected) {
-    return '<option value="">Selecciona un instrumento...</option>' + Store.getInstrumentos().map(function (i) {
-      return '<option value="' + i.id + '"' + (selected === i.id ? ' selected' : '') + '>' + esc(i.name) + '</option>';
-    }).join('');
-  }
-
+  // ---------------- edit: checklist builder ----------------
   function checklistItemHTML(item, idx) {
     var isInst = item.mode === 'instrumento';
-    var vtOrder = ['ninguno', 'rango', 'conteo', 'texto'];
+    var vtOrder = ['ninguno', 'rango', 'conteo'];
     var vtButtons = vtOrder.map(function (vt) {
       return '<button type="button" class="coltbtn ' + (item.valueType === vt ? 'on' : '') + '" data-vt="' + vt + '" data-item="' + idx + '">' + VALUE_TYPE_LABELS[vt] + '</button>';
     }).join('');
@@ -166,7 +186,7 @@
       '<button type="button" class="coltbtn ' + (!isInst ? 'on' : '') + '" data-mode="personalizado" data-item="' + idx + '">Elemento personalizado</button>' +
       '</div>' +
       (isInst
-        ? '<select class="input" data-inst-select="' + idx + '">' + instrumentoOptionsHTML(item.instrumentoId) + '</select>'
+        ? '<div id="inst-dd-' + idx + '"></div>'
         : '<input class="input" placeholder="Ej. Piso, Paredes, Estanterías..." value="' + esc(item.label) + '" data-label-input="' + idx + '">') +
       '<div><label style="display:block;font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Tipo de valor a registrar</label>' +
       '<div class="colstoggle">' + vtButtons + '</div></div>' +
@@ -175,8 +195,12 @@
           (item.valueType === 'rango' ? (
             '<div class="daysfield"><label>Mínimo</label><input class="daysinput" type="number" value="' + esc(item.min) + '" data-min-input="' + idx + '"></div>' +
             '<div class="daysfield"><label>Máximo</label><input class="daysinput" type="number" value="' + esc(item.max) + '" data-max-input="' + idx + '"></div>'
-          ) : '') +
-          '<div class="daysfield"><label>Unidad <span class="sub">(opcional)</span></label><input class="daysinput" style="font-weight:500" placeholder="°C, kg, uds..." value="' + esc(item.unit) + '" data-unit-input="' + idx + '"></div>' +
+          ) : (
+            '<div class="daysfield"><label>Valor</label><input class="daysinput" type="number" value="' + esc(item.value) + '" data-conteo-value-input="' + idx + '"></div>'
+          )) +
+          '<div class="daysfield"><label>Unidad <span class="sub">(opcional)</span></label><div id="unit-dd-' + idx + '"></div>' +
+          (item.unitMode === 'custom' ? '<input class="daysinput" style="margin-top:8px;font-weight:500" placeholder="Escribe la unidad..." value="' + esc(item.unit) + '" data-custom-unit-input="' + idx + '">' : '') +
+          '</div>' +
           '</div>'
         : '') +
       '</div></div>';
@@ -217,12 +241,6 @@
         renderChecklist();
       });
     });
-    box.querySelectorAll('[data-inst-select]').forEach(function (sel) {
-      sel.addEventListener('change', function () {
-        var idx = parseInt(sel.getAttribute('data-inst-select'), 10);
-        form.checklist[idx].instrumentoId = sel.value;
-      });
-    });
     box.querySelectorAll('[data-label-input]').forEach(function (inp) {
       inp.addEventListener('input', function () {
         var idx = parseInt(inp.getAttribute('data-label-input'), 10);
@@ -235,15 +253,68 @@
     box.querySelectorAll('[data-max-input]').forEach(function (inp) {
       inp.addEventListener('input', function () { form.checklist[parseInt(inp.getAttribute('data-max-input'), 10)].max = inp.value; });
     });
-    box.querySelectorAll('[data-unit-input]').forEach(function (inp) {
-      inp.addEventListener('input', function () { form.checklist[parseInt(inp.getAttribute('data-unit-input'), 10)].unit = inp.value; });
+    box.querySelectorAll('[data-conteo-value-input]').forEach(function (inp) {
+      inp.addEventListener('input', function () { form.checklist[parseInt(inp.getAttribute('data-conteo-value-input'), 10)].value = inp.value; });
+    });
+    box.querySelectorAll('[data-custom-unit-input]').forEach(function (inp) {
+      inp.addEventListener('input', function () { form.checklist[parseInt(inp.getAttribute('data-custom-unit-input'), 10)].unit = inp.value; });
+    });
+
+    // custom dropdowns: instrumento picker (per instrumento-linked item) + unit picker (per rango/conteo item)
+    form.checklist.forEach(function (item, idx) {
+      if (item.mode === 'instrumento') {
+        var instContainer = document.getElementById('inst-dd-' + idx);
+        var instItems = Store.getInstrumentos().map(function (i) {
+          var a = i.areaId ? Store.getArea(i.areaId) : null;
+          return { id: i.id, label: i.name, sub: a ? a.name : 'Sin área', icon: i.icon, color: a ? a.color : '#94a3b8' };
+        });
+        Dropdown.mountSelect(instContainer, {
+          items: instItems, selectedId: item.instrumentoId, placeholder: 'Selecciona un instrumento...',
+          onSelect: function (id) { form.checklist[idx].instrumentoId = id; },
+        });
+      }
+      if (item.valueType === 'rango' || item.valueType === 'conteo') {
+        var unitContainer = document.getElementById('unit-dd-' + idx);
+        var unitItems = [{ id: CUSTOM_UNIT_ID, label: 'Personalizar...' }].concat(UNIT_PRESETS);
+        Dropdown.mountSelect(unitContainer, {
+          items: unitItems, panelColumns: 1,
+          selectedId: item.unitMode === 'custom' ? CUSTOM_UNIT_ID : (item.unit || ''),
+          placeholder: 'Sin unidad',
+          onSelect: function (id) {
+            if (id === CUSTOM_UNIT_ID) { form.checklist[idx].unitMode = 'custom'; }
+            else { form.checklist[idx].unitMode = 'preset'; form.checklist[idx].unit = id; }
+            renderChecklist();
+          },
+        });
+      }
+    });
+  }
+
+  // ---------------- edit: weekday picker (only for 'semanal') ----------------
+  function renderWeekdayBox() {
+    var box = document.getElementById('weekday-box');
+    if (form.frequency !== 'semanal') { box.innerHTML = ''; return; }
+    box.innerHTML = '' +
+      '<div class="field" style="margin-bottom:18px"><label>Días de la semana <span style="color:var(--t3);font-weight:400">(opcional — si no eliges ninguno, se repite el mismo día de la semana que la fecha de inicio)</span></label>' +
+      '<div class="colstoggle" id="weekday-toggle">' +
+      WEEKDAY_LABELS.map(function (lbl, i) {
+        return '<button type="button" class="coltbtn ' + (form.weekdays.indexOf(i) !== -1 ? 'on' : '') + '" data-weekday="' + i + '">' + lbl + '</button>';
+      }).join('') + '</div></div>';
+    box.querySelectorAll('[data-weekday]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var day = parseInt(btn.getAttribute('data-weekday'), 10);
+        var idx = form.weekdays.indexOf(day);
+        if (idx === -1) form.weekdays.push(day); else form.weekdays.splice(idx, 1);
+        btn.classList.toggle('on');
+      });
     });
   }
 
   function renderEdit() {
-    var freqButtons = ['diaria', 'semanal', 'mensual', 'trimestral', 'anual'].map(function (f) {
-      return '<button type="button" class="coltbtn ' + (form.frequency === f ? 'on' : '') + '" data-freq="' + f + '" style="flex:1">' + FREQ_LABELS[f] + '</button>';
+    var freqButtons = FREQ_ORDER.map(function (f) {
+      return '<button type="button" class="coltbtn ' + (form.frequency === f ? 'on' : '') + '" data-freq="' + f + '">' + FREQ_LABELS[f] + '</button>';
     }).join('');
+    var dateLabel = form.frequency === 'unica' ? 'Fecha' : 'Fecha de inicio';
 
     root.innerHTML = '' +
       '<div class="editwrap">' +
@@ -255,12 +326,13 @@
       '<div class="field" style="margin-bottom:18px"><label>Descripción <span style="color:var(--t3);font-weight:400">(opcional)</span></label>' +
       '<textarea class="textarea" id="lab-desc-input" placeholder="Describe brevemente en qué consiste...">' + esc(form.desc) + '</textarea></div>' +
       '<div class="daysgrid" style="margin-bottom:18px">' +
-      '<div class="field"><label>Área</label><select class="input" id="lab-area-select">' + areaOptionsHTML() + '</select></div>' +
-      '<div class="field"><label>Responsable</label><select class="input" id="lab-assignee-select">' + personaOptionsHTML() + '</select></div>' +
+      '<div class="field"><label>Área</label><div id="lab-area-dd"></div></div>' +
+      '<div class="field"><label>Responsable(s)</label><div id="lab-assignee-dd"></div></div>' +
       '</div>' +
-      '<div class="field" style="margin-bottom:18px"><label>Frecuencia</label><div class="colstoggle" style="width:100%" id="lab-freq-toggle">' + freqButtons + '</div></div>' +
+      '<div class="field" style="margin-bottom:18px"><label>Frecuencia</label><div class="colstoggle" id="lab-freq-toggle">' + freqButtons + '</div></div>' +
+      '<div id="weekday-box"></div>' +
       '<div class="daysgrid">' +
-      '<div class="field"><label>Fecha de inicio</label><input class="input" type="date" id="lab-startdate-input" value="' + esc(form.startDate) + '"></div>' +
+      '<div class="field"><label id="lab-startdate-label">' + dateLabel + '</label><input class="input" type="date" id="lab-startdate-input" value="' + esc(form.startDate) + '"></div>' +
       '<div class="field"><label>Hora sugerida <span style="color:var(--t3);font-weight:400">(opcional)</span></label><input class="input" type="time" id="lab-time-input" value="' + esc(form.time) + '"></div>' +
       '</div>' +
       '</div>' +
@@ -274,7 +346,7 @@
       '<ul class="tiplist">' +
       '<li>Cada elemento del checklist puede vincularse a un instrumento registrado o ser un elemento personalizado (ej. piso, paredes).</li>' +
       '<li>El tipo de valor define qué le pedirá el checklist a quien ejecute la labor: un rango con unidad, un conteo, texto libre o solo un estado.</li>' +
-      '<li>La labor aparecerá en el calendario según la frecuencia y fecha de inicio que definas.</li>' +
+      '<li>La labor aparecerá en el calendario según la frecuencia y fecha que definas.</li>' +
       '</ul></div>' +
       '<div class="editactions">' +
       '<button type="button" class="btn btn-primary f1" id="lab-save"><svg class="ic ic20"><use href="#i-check"></use></svg><span>Guardar labor</span></button>' +
@@ -284,15 +356,28 @@
 
     document.getElementById('lab-name-input').addEventListener('input', function (e) { form.name = e.target.value; });
     document.getElementById('lab-desc-input').addEventListener('input', function (e) { form.desc = e.target.value; });
-    document.getElementById('lab-area-select').addEventListener('change', function (e) { form.areaId = e.target.value; });
-    document.getElementById('lab-assignee-select').addEventListener('change', function (e) { form.assigneeId = e.target.value; });
     document.getElementById('lab-startdate-input').addEventListener('input', function (e) { form.startDate = e.target.value; });
     document.getElementById('lab-time-input').addEventListener('input', function (e) { form.time = e.target.value; });
+
     document.getElementById('lab-freq-toggle').querySelectorAll('[data-freq]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         form.frequency = btn.getAttribute('data-freq');
         document.getElementById('lab-freq-toggle').querySelectorAll('[data-freq]').forEach(function (b) { b.classList.toggle('on', b === btn); });
+        document.getElementById('lab-startdate-label').textContent = form.frequency === 'unica' ? 'Fecha' : 'Fecha de inicio';
+        renderWeekdayBox();
       });
+    });
+    renderWeekdayBox();
+
+    Dropdown.mountSelect(document.getElementById('lab-area-dd'), {
+      items: Store.getAreas().map(function (a) { return { id: a.id, label: a.name, icon: a.icon, color: a.color }; }),
+      selectedId: form.areaId, placeholder: 'Sin área específica', hideItemIcon: true, panelColumns: 1,
+      onSelect: function (id) { form.areaId = id; },
+    });
+    Dropdown.mountMultiSelect(document.getElementById('lab-assignee-dd'), {
+      items: Store.getPersonalList().map(function (p) { return { id: p.id, label: p.name, sub: p.role || 'Sin rol asignado' }; }),
+      selectedIds: form.assigneeIds, placeholder: 'Sin asignar',
+      onChange: function (ids) { form.assigneeIds = ids; },
     });
 
     renderChecklist();
