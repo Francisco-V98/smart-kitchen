@@ -136,17 +136,20 @@
       var assigneeText = names.length <= 2 ? names.join(', ') : names[0] + ' +' + (names.length - 1) + ' más';
       var freqText = FREQ_LABELS[l.frequency] + (l.frequency === 'semanal' && l.weekdays && l.weekdays.length ? ' (' + l.weekdays.map(function (w) { return WEEKDAY_LABELS[w]; }).join('/') + ')' : '');
       return '<div class="labcard" data-id="' + l.id + '">' +
-        '<div class="labcard-top"><div>' +
+        '<div class="labcard-top">' +
+        '<div class="labcard-top-main">' +
+        '<span class="labfreq-badge">' + esc(freqText) + '</span>' +
         '<div class="labname">' + esc(l.name) + '</div>' +
         (l.desc ? '<div class="labdesc">' + esc(l.desc) + '</div>' : '') +
-        '</div><span class="labfreq-badge">' + esc(freqText) + '</span></div>' +
+        '</div>' +
+        '<button type="button" class="iconbtn" data-edit="' + l.id + '"><svg class="ic ic18"><use href="#i-pencil"></use></svg></button>' +
+        '</div>' +
         '<div class="labmeta">' +
         (area ? '<span class="labmeta-item"><span class="dot" style="background:' + area.color + '"></span>' + esc(area.name) + '</span>' : '') +
         (names.length ? '<span class="labmeta-item"><svg class="ic ic14"><use href="#i-users"></use></svg>' + esc(assigneeText) + '</span>' : '') +
         (l.time ? '<span class="labmeta-item"><svg class="ic ic14"><use href="#i-clock"></use></svg>' + esc(l.time) + '</span>' : '') +
         '<span class="labmeta-item"><svg class="ic ic14"><use href="#i-clipboard"></use></svg>' + l.checklist.length + ' ítems</span>' +
         '</div>' +
-        '<div style="display:flex;justify-content:flex-end"><button type="button" class="iconbtn" data-edit="' + l.id + '"><svg class="ic ic18"><use href="#i-pencil"></use></svg></button></div>' +
         '</div>';
     }).join('');
 

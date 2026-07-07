@@ -92,6 +92,10 @@
           background: var(--bg)
         }
 
+.kanban-card.has-incidencia {
+          border-color: var(--red)
+        }
+
 .kanban-card-name {
           font-size: 13.5px;
           font-weight: 700;

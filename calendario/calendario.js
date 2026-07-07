@@ -101,14 +101,14 @@
     var statusLabel = alert ? 'Con incidencia' : (completed ? 'Completada' : 'Pendiente');
     var muted = completed ? 'color:var(--t3)' : '';
     var incCount = activeIncidenciaCount(o.labor);
-    return '<div class="kanban-card ' + (completed ? 'done' : '') + '" data-execute-labor="' + o.labor.id + '" data-execute-date="' + o.date + '">' +
+    return '<div class="kanban-card ' + (completed ? 'done' : '') + (alert ? ' has-incidencia' : '') + '" data-execute-labor="' + o.labor.id + '" data-execute-date="' + o.date + '">' +
       '<div class="kanban-card-name">' + esc(o.labor.name) + '</div>' +
       '<div class="kanban-card-meta">' +
       (area ? '<span class="kanban-meta-item" style="' + muted + '"><span class="dot" style="background:' + (completed ? '#c7ccd6' : area.color) + '"></span>' + esc(area.name) + '</span>' : '') +
       (o.labor.time ? '<span class="kanban-meta-item" style="' + muted + '"><svg class="ic ic12"><use href="#i-clock"></use></svg>' + esc(o.labor.time) + '</span>' : '') +
       (names ? '<span class="kanban-meta-item" style="' + muted + '"><svg class="ic ic12"><use href="#i-users"></use></svg>' + esc(names) + '</span>' : '') +
       '</div>' +
-      (incCount ? '<span class="kanban-inc-tag"><svg class="ic ic12"><use href="#i-alert-triangle"></use></svg>' + incCount + (incCount === 1 ? ' incidencia' : ' incidencias') + '</span>' : '') +
+      (incCount ? '<span class="kanban-inc-tag"><svg class="ic ic12"><use href="#i-alert-triangle"></use></svg>' + incCount + '</span>' : '') +
       '<span class="cal-status-pill ' + statusClass + '">' + statusLabel + '</span>' +
       '</div>';
   }

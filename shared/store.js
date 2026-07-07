@@ -23,7 +23,7 @@
     { id: 'fuera_servicio', label: 'Fuera de servicio', color: 'red', weight: 4 },
   ];
 
-  var INCIDENCIA_STATUS_LABELS = { abierta: 'Abierta', en_seguimiento: 'En seguimiento', resuelta: 'Resuelta' };
+  var INCIDENCIA_STATUS_LABELS = { abierta: 'Revisar', en_seguimiento: 'En seguimiento', resuelta: 'Resuelta' };
 
   var SEED = {
     kitchen: 'Cocina 1',

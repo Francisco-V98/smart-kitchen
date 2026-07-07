@@ -401,6 +401,12 @@
       '</div>' +
       '<div class="hist-weekdays">' + weekdaysHTML + '</div>' +
       '<div class="hist-grid">' + cellsHTML + '</div>' +
+      '<div class="hist-legend">' +
+      '<span class="hist-legend-item"><span class="hist-dot hist-dot-ok"></span>OK</span>' +
+      '<span class="hist-legend-item"><span class="hist-dot hist-dot-incidencia"></span>Incidencia</span>' +
+      '<span class="hist-legend-item"><span class="hist-dot hist-dot-na"></span>No aplica</span>' +
+      '<span class="hist-legend-item"><span class="hist-dot hist-dot-pending"></span>Pendiente</span>' +
+      '</div>' +
       '</div>' +
       '<div class="hist-card">' +
       '<div class="hist-panel-date">' + dayHeading + '</div>' +
