@@ -12,6 +12,17 @@
     return d.toISOString().slice(0, 10);
   }
 
+  // Drives incident severity choices, the instrument health badge, and its
+  // color, everywhere ("bueno" is instrument-only — never a pickable
+  // incident severity, an incident is by definition not "bueno").
+  var INCIDENT_SEVERITY_LEVELS = [
+    { id: 'bueno', label: 'Bueno / Funcional', color: 'green', weight: 0 },
+    { id: 'revision', label: 'Necesita revisión', color: 'yellow', weight: 1 },
+    { id: 'deteriorado', label: 'Deteriorado / Falla parcial', color: 'yellow', weight: 2 },
+    { id: 'danado', label: 'Dañado', color: 'red', weight: 3 },
+    { id: 'fuera_servicio', label: 'Fuera de servicio', color: 'red', weight: 4 },
+  ];
+
   var SEED = {
     kitchen: 'Cocina 1',
     cats: [
@@ -61,11 +72,11 @@
       { id: 'banos', name: 'Baños', color: '#0EA5E9', icon: '#i-droplet' },
     ],
     instrumentos: [
-      { id: 'nevera1', name: 'Nevera 1', areaId: 'cocina', icon: '#i-snow', notes: 'Refrigerador principal de cocina' },
-      { id: 'nevera2', name: 'Nevera 2', areaId: 'cocina', icon: '#i-snow', notes: '' },
-      { id: 'congelador1', name: 'Congelador 1', areaId: 'almacen', icon: '#i-snow', notes: 'Conservación -18°C' },
-      { id: 'freidora1', name: 'Freidora', areaId: 'cocina', icon: '#i-flame', notes: '' },
-      { id: 'licuadora1', name: 'Licuadora industrial', areaId: 'cocina', icon: '#i-package', notes: '' },
+      { id: 'nevera1', name: 'Nevera 1', areaId: 'cocina', icon: '#i-snow', notes: 'Refrigerador principal de cocina', status: 'bueno' },
+      { id: 'nevera2', name: 'Nevera 2', areaId: 'cocina', icon: '#i-snow', notes: '', status: 'bueno' },
+      { id: 'congelador1', name: 'Congelador 1', areaId: 'almacen', icon: '#i-snow', notes: 'Conservación -18°C', status: 'bueno' },
+      { id: 'freidora1', name: 'Freidora', areaId: 'cocina', icon: '#i-flame', notes: '', status: 'bueno' },
+      { id: 'licuadora1', name: 'Licuadora industrial', areaId: 'cocina', icon: '#i-package', notes: '', status: 'bueno' },
     ],
     personal: [
       { id: 'ana', name: 'Ana Ruiz', role: 'Chef' },
@@ -129,6 +140,30 @@
         ],
         report: '',
       },
+      {
+        id: 'ej3', laborId: 'lab2', date: isoOffset(-2), completedBy: 'luis', completedAt: Date.now(),
+        results: [
+          { checklistItemId: 'ci1', value: '', itemStatus: 'ok' },
+          { checklistItemId: 'ci2', value: '', itemStatus: 'ok' },
+          { checklistItemId: 'ci3', value: '', itemStatus: 'incidencia' },
+        ],
+        report: 'Congelador 1 no enfría correctamente, posible falla de compresor.',
+      },
+    ],
+    incidencias: [
+      {
+        id: 'inc1', laborId: 'lab1', date: isoOffset(-1), checklistItemId: 'ci2', itemLabel: 'Nevera 2', instrumentoId: 'nevera2',
+        severity: 'deteriorado', description: 'Nevera 2 marcó 5°C, por encima del rango esperado (1–4°C).',
+        status: 'resuelta',
+        comments: [{ id: 'com1', text: 'Se ajustó el termostato y volvió al rango correcto.', createdAt: Date.now() }],
+        createdAt: Date.now(), updatedAt: Date.now(), resolvedAt: Date.now(),
+      },
+      {
+        id: 'inc2', laborId: 'lab2', date: isoOffset(-2), checklistItemId: 'ci3', itemLabel: 'Congelador 1 (exterior)', instrumentoId: 'congelador1',
+        severity: 'danado', description: 'El congelador no alcanza la temperatura mínima, parece tener un problema de compresor.',
+        status: 'abierta', comments: [],
+        createdAt: Date.now(), updatedAt: Date.now(), resolvedAt: null,
+      },
     ],
   };
 
@@ -151,7 +186,24 @@
         }
       });
     });
+    if (!d.incidencias) d.incidencias = [];
+    d.instrumentos.forEach(function (i) {
+      if (i.status === undefined) i.status = 'bueno';
+    });
+    // Instrument status is always derived from its open incidents, never
+    // hand-edited, so recompute it fresh on every load.
+    d.instrumentos.forEach(function (i) { i.status = recomputeStatus(d, i.id); });
     return d;
+  }
+
+  function recomputeStatus(d, instrumentoId) {
+    var opens = d.incidencias.filter(function (inc) { return inc.instrumentoId === instrumentoId && inc.status !== 'resuelta'; });
+    var best = null;
+    opens.forEach(function (inc) {
+      var lvl = INCIDENT_SEVERITY_LEVELS.find(function (l) { return l.id === inc.severity; });
+      if (lvl && (!best || lvl.weight > best.weight)) best = lvl;
+    });
+    return best ? best.id : 'bueno';
   }
 
   function load() {
@@ -385,7 +437,7 @@
     getInstrumentos: function () { return data.instrumentos.slice(); },
     getInstrumento: function (id) { return data.instrumentos.find(function (i) { return i.id === id; }) || null; },
     addInstrumento: function (i) {
-      var rec = { id: uid('inst'), name: i.name, areaId: i.areaId, icon: i.icon, notes: i.notes || '' };
+      var rec = { id: uid('inst'), name: i.name, areaId: i.areaId, icon: i.icon, notes: i.notes || '', status: 'bueno' };
       data.instrumentos.push(rec); save(); return rec;
     },
     updateInstrumento: function (id, patch) {
@@ -395,6 +447,76 @@
     },
     deleteInstrumento: function (id) {
       data.instrumentos = data.instrumentos.filter(function (i) { return i.id !== id; });
+      save();
+    },
+    getInstrumentoHistoryForDate: function (instrumentoId, dateStr) {
+      var self = this;
+      var involved = data.labores.filter(function (l) {
+        return (l.checklist || []).some(function (ci) { return ci.instrumentoId === instrumentoId; }) && self.isDueOn(l, dateStr);
+      });
+      return involved.map(function (l) {
+        var ej = self.getEjecucion(l.id, dateStr);
+        var item = l.checklist.find(function (ci) { return ci.instrumentoId === instrumentoId; });
+        var result = ej ? (ej.results || []).find(function (r) { return r.checklistItemId === item.id; }) : null;
+        return { labor: l, item: item, ejecucion: ej, itemStatus: result ? result.itemStatus : null };
+      });
+    },
+
+    // ---- incidencias ----
+    incidentSeverityLevels: INCIDENT_SEVERITY_LEVELS,
+    getIncidencias: function () { return data.incidencias.slice(); },
+    getIncidencia: function (id) { return data.incidencias.find(function (inc) { return inc.id === id; }) || null; },
+    getIncidenciaByKey: function (laborId, dateStr, checklistItemId) {
+      return data.incidencias.find(function (inc) {
+        return inc.laborId === laborId && inc.date === dateStr && inc.checklistItemId === checklistItemId;
+      }) || null;
+    },
+    saveIncidencia: function (laborId, dateStr, checklistItemId, payload) {
+      var existing = this.getIncidenciaByKey(laborId, dateStr, checklistItemId);
+      if (existing) {
+        Object.assign(existing, payload, { updatedAt: Date.now() });
+        if (existing.instrumentoId) this.recomputeInstrumentoStatus(existing.instrumentoId); else save();
+        return existing;
+      }
+      var rec = Object.assign({
+        id: uid('inc'), laborId: laborId, date: dateStr, checklistItemId: checklistItemId,
+        status: 'abierta', comments: [], createdAt: Date.now(), updatedAt: Date.now(), resolvedAt: null,
+      }, payload);
+      data.incidencias.push(rec);
+      if (rec.instrumentoId) this.recomputeInstrumentoStatus(rec.instrumentoId); else save();
+      return rec;
+    },
+    deleteIncidenciaByKey: function (laborId, dateStr, checklistItemId) {
+      var existing = this.getIncidenciaByKey(laborId, dateStr, checklistItemId);
+      if (!existing) return;
+      var instId = existing.instrumentoId;
+      data.incidencias = data.incidencias.filter(function (inc) { return inc.id !== existing.id; });
+      if (instId) this.recomputeInstrumentoStatus(instId); else save();
+    },
+    updateIncidenciaStatus: function (id, status) {
+      var inc = this.getIncidencia(id);
+      if (!inc) return null;
+      inc.status = status;
+      inc.updatedAt = Date.now();
+      inc.resolvedAt = status === 'resuelta' ? Date.now() : null;
+      if (inc.instrumentoId) this.recomputeInstrumentoStatus(inc.instrumentoId); else save();
+      return inc;
+    },
+    addIncidenciaComment: function (id, text) {
+      var inc = this.getIncidencia(id);
+      if (!inc) return null;
+      inc.comments.push({ id: uid('com'), text: text, createdAt: Date.now() });
+      inc.updatedAt = Date.now();
+      save();
+      return inc;
+    },
+    getOpenIncidenciasForInstrumento: function (instrumentoId) {
+      return data.incidencias.filter(function (inc) { return inc.instrumentoId === instrumentoId && inc.status !== 'resuelta'; });
+    },
+    recomputeInstrumentoStatus: function (instrumentoId) {
+      var inst = this.getInstrumento(instrumentoId);
+      if (!inst) { save(); return; }
+      inst.status = recomputeStatus(data, instrumentoId);
       save();
     },
 
@@ -428,9 +550,13 @@
       return l;
     },
     deleteLabor: function (id) {
+      var self = this;
+      var affectedInstrumentos = data.incidencias.filter(function (inc) { return inc.laborId === id && inc.instrumentoId; }).map(function (inc) { return inc.instrumentoId; });
       data.labores = data.labores.filter(function (l) { return l.id !== id; });
       data.ejecuciones = data.ejecuciones.filter(function (e) { return e.laborId !== id; });
+      data.incidencias = data.incidencias.filter(function (inc) { return inc.laborId !== id; });
       save();
+      affectedInstrumentos.forEach(function (instId) { self.recomputeInstrumentoStatus(instId); });
     },
 
     // ---- recurrencia + ejecuciones ----

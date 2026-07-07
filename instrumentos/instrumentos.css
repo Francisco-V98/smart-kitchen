@@ -58,10 +58,196 @@
           line-height: 1.4
         }
 
+.instfoot {
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid var(--line);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px
+        }
+
+.inst-hist-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--brand);
+          background: transparent;
+          border: 0;
+          cursor: pointer;
+          padding: 4px 0;
+          font-family: inherit
+        }
+
+.hist-back {
+          display: inline-block;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--t3);
+          cursor: pointer;
+          margin-bottom: 18px
+        }
+
+.hist-header {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 24px
+        }
+
+.hist-inst-name {
+          font-size: 19px;
+          font-weight: 700;
+          color: var(--t1);
+          margin-bottom: 7px
+        }
+
+.hist-wrap {
+          display: grid;
+          grid-template-columns: 1fr 360px;
+          gap: 24px;
+          align-items: start
+        }
+
+.hist-card {
+          background: #fff;
+          border: 1px solid var(--line);
+          border-radius: 20px;
+          padding: 22px;
+          box-shadow: var(--sh-sm)
+        }
+
+.hist-weekdays {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 6px;
+          margin-bottom: 6px
+        }
+
+.hist-weekday {
+          text-align: center;
+          font-size: 11.5px;
+          font-weight: 700;
+          color: var(--t3);
+          text-transform: uppercase;
+          letter-spacing: .04em;
+          padding: 6px 0
+        }
+
+.hist-grid {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 6px
+        }
+
+.hist-cell {
+          aspect-ratio: 1;
+          border-radius: 12px;
+          border: 1.5px solid var(--line);
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--t1);
+          cursor: pointer;
+          transition: all .15s;
+          min-height: 44px
+        }
+
+.hist-cell.other-month {
+          opacity: .35
+        }
+
+.hist-cell.hist-ok {
+          background: #e7f9ee;
+          border-color: #bfe8cf;
+          color: #166534
+        }
+
+.hist-cell.hist-incidencia {
+          background: #fdeaea;
+          border-color: #f3c6c6;
+          color: #b91c1c
+        }
+
+.hist-cell.hist-pending {
+          background: var(--bg)
+        }
+
+.hist-cell.today {
+          border-color: var(--brand);
+          box-shadow: 0 0 0 2px var(--brand-50)
+        }
+
+.hist-cell.selected {
+          border-color: var(--brand);
+          box-shadow: 0 0 0 2px var(--brand-50)
+        }
+
+.hist-panel-date {
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--t1);
+          margin-bottom: 16px;
+          text-transform: capitalize
+        }
+
+.hist-panel-empty {
+          font-size: 13px;
+          color: var(--t3);
+          line-height: 1.5
+        }
+
+.hist-entry-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px
+        }
+
+.hist-entry {
+          border: 1.5px solid var(--line);
+          border-radius: 14px;
+          padding: 14px
+        }
+
+.hist-entry-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px
+        }
+
+.hist-entry-name {
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--t1)
+        }
+
+.hist-entry-desc {
+          font-size: 12.5px;
+          color: var(--t3);
+          margin-top: 8px;
+          line-height: 1.5
+        }
+
 @media (max-width: 768px) {
 
   .instgrid {
               grid-template-columns: 1fr
+            }
+
+  .hist-wrap {
+              grid-template-columns: 1fr
+            }
+
+  .hist-cell {
+              font-size: 11px;
+              min-height: 34px
             }
 
 }

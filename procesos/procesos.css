@@ -200,29 +200,6 @@
           border-top: 1px solid var(--line)
         }
 
-.filter-chip {
-          height: 36px;
-          padding: 0 14px;
-          border-radius: 999px;
-          border: 1.5px solid var(--line-2);
-          background: #fff;
-          font-family: inherit;
-          font-size: 13px;
-          font-weight: 600;
-          color: var(--t2);
-          cursor: pointer;
-          transition: all .15s;
-          display: flex;
-          align-items: center;
-          gap: 6px
-        }
-
-.filter-chip.on {
-          border-color: var(--brand);
-          background: var(--brand-50);
-          color: var(--brand)
-        }
-
 .modelo-preview-wrap {
           padding: 16px 16px 12px;
           background: #f3f4f6;

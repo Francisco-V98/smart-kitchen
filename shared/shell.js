@@ -13,6 +13,7 @@
     ] },
     { label: 'Registro de acciones', items: [
       { id: 'calendario', name: 'Calendario', icon: '#i-calendar', href: '../calendario/index.html' },
+      { id: 'incidencias', name: 'Incidencias', icon: '#i-alert-triangle', href: '../incidencias/index.html' },
       { id: 'labores', name: 'Labores', icon: '#i-clipboard', href: '../labores/index.html' },
       { id: 'areas', name: 'Áreas', icon: '#i-map-pin', href: '../areas/index.html' },
       { id: 'instrumentos', name: 'Instrumentos', icon: '#i-wrench', href: '../instrumentos/index.html' },
