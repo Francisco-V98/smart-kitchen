@@ -6,7 +6,11 @@
   var detailId = null;
   var listState = { statusFilter: 'activas', severityFilter: null, areaFilter: null };
 
-  var STATUS_LABELS = { abierta: 'Abierta', en_seguimiento: 'En seguimiento', resuelta: 'Resuelta' };
+  var editingCommentId = null;
+  var editDraft = null; // { text, image }
+  var composerImage = null;
+
+  var STATUS_LABELS = Store.incidenciaStatusLabels;
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -31,7 +35,11 @@
   }
 
   function goList() { view = 'list'; detailId = null; render(); }
-  function openDetail(inc) { view = 'detail'; detailId = inc.id; render(); }
+  function openDetail(inc) {
+    view = 'detail'; detailId = inc.id;
+    editingCommentId = null; editDraft = null; composerImage = null;
+    render();
+  }
 
   function updateHead() {
     if (view === 'list') {
@@ -109,6 +117,7 @@
         '<div class="inccard-item">' + esc(d.raw.itemLabel) + '</div></div>' +
         '<span class="severity-badge severity-' + d.lvl.color + '">' + esc(d.lvl.label) + '</span></div>' +
         '<div class="inccard-desc">' + esc(d.raw.description) + '</div>' +
+        (d.raw.image ? '<img class="img-thumb" src="' + d.raw.image + '">' : '') +
         '<div class="inccard-foot">' +
         '<span class="inccard-foot-item">' + fmtDate(d.raw.date) + '</span>' +
         '<span class="inc-status-badge ' + d.raw.status + '">' + esc(STATUS_LABELS[d.raw.status]) + '</span>' +
@@ -127,6 +136,37 @@
   }
 
   // ---------------- detail ----------------
+  function commentBlockHTML(c) {
+    if (editingCommentId === c.id) {
+      return '<div class="comment-item" data-comment="' + c.id + '">' +
+        '<textarea class="textarea" data-edit-comment-text style="min-height:70px">' + esc(editDraft.text) + '</textarea>' +
+        '<div id="edit-image-area">' + editImageAreaHTML(editDraft.image, true) + '</div>' +
+        '<div class="comment-edit-actions"><button type="button" class="btn btn-ghost" data-cancel-edit-comment>Cancelar</button>' +
+        '<button type="button" class="btn btn-primary" data-save-edit-comment="' + c.id + '">Guardar</button></div>' +
+        '</div>';
+    }
+    return '<div class="comment-item" data-comment="' + c.id + '">' +
+      '<div class="comment-item-top"><div class="comment-text">' + esc(c.text) + '</div>' +
+      '<div class="comment-actions">' +
+      '<button type="button" class="comment-action-btn" data-edit-comment="' + c.id + '" title="Editar"><svg class="ic ic14"><use href="#i-pencil"></use></svg></button>' +
+      '<button type="button" class="comment-action-btn" data-delete-comment="' + c.id + '" title="Eliminar"><svg class="ic ic14"><use href="#i-trash"></use></svg></button>' +
+      '</div></div>' +
+      (c.image ? '<img class="img-thumb" style="margin-top:8px" src="' + c.image + '">' : '') +
+      '<div class="comment-date">' + new Date(c.createdAt).toLocaleString() + (c.updatedAt && c.updatedAt !== c.createdAt ? ' · editado' : '') + '</div></div>';
+  }
+
+  function editImageAreaHTML(image, isEdit) {
+    var attachAttr = isEdit ? 'data-edit-attach-trigger' : 'id="composer-attach-trigger"';
+    var inputAttr = isEdit ? 'data-edit-image-input' : 'id="composer-image-input"';
+    var removeAttr = isEdit ? 'data-edit-remove-image' : 'id="composer-remove-image"';
+    if (image) {
+      return '<div class="img-thumb-wrap"><img class="img-thumb" src="' + image + '">' +
+        '<button type="button" class="img-thumb-remove" ' + removeAttr + ' title="Quitar imagen"><svg class="ic ic14"><use href="#i-x"></use></svg></button></div>';
+    }
+    return '<button type="button" class="img-attach-btn" ' + attachAttr + '><svg class="ic ic16"><use href="#i-image"></use></svg>Adjuntar imagen (opcional)</button>' +
+      '<input type="file" accept="image/*" ' + inputAttr + ' style="display:none">';
+  }
+
   function renderDetail() {
     var inc = Store.getIncidencia(detailId);
     if (!inc) { goList(); return; }
@@ -137,10 +177,7 @@
     }).join('');
 
     var commentsHTML = inc.comments.length
-      ? '<div class="comment-list">' + inc.comments.map(function (c) {
-        return '<div class="comment-item"><div class="comment-text">' + esc(c.text) + '</div>' +
-          '<div class="comment-date">' + new Date(c.createdAt).toLocaleString() + '</div></div>';
-      }).join('') + '</div>'
+      ? '<div class="comment-list">' + inc.comments.map(commentBlockHTML).join('') + '</div>'
       : '<div class="comment-empty">Sin comentarios todavía.</div>';
 
     root.innerHTML = '' +
@@ -157,12 +194,15 @@
       '<span class="severity-badge severity-' + d.lvl.color + '"><span class="severity-dot severity-' + d.lvl.color + '"></span>' + esc(d.lvl.label) + '</span>' +
       '</div>' +
       '<div class="inc-desc-full">' + esc(inc.description) + '</div>' +
-      '<div class="field" style="margin-bottom:20px"><label>Estado de la incidencia</label>' +
+      (inc.image ? '<img class="img-full" src="' + inc.image + '" id="inc-image-full">' : '') +
+      '<div class="field" style="margin:20px 0"><label>Estado de la incidencia</label>' +
       '<div class="status-toggle" style="margin-top:0" id="inc-status-toggle">' + statusButtons + '</div></div>' +
       '<div class="field"><label>Comentarios y seguimiento</label>' +
       commentsHTML +
-      '<div class="comment-add-row"><textarea class="textarea" id="inc-comment-input" placeholder="Agrega una actualización o comentario..." style="min-height:44px"></textarea>' +
-      '<button type="button" class="btn btn-primary" id="inc-comment-add">Agregar</button></div>' +
+      '<div class="comment-add-row"><div style="flex:1;display:flex;flex-direction:column;gap:10px">' +
+      '<textarea class="textarea" id="inc-comment-input" placeholder="Agrega una actualización o comentario..." style="min-height:44px"></textarea>' +
+      '<div id="composer-image-area">' + editImageAreaHTML(composerImage, false) + '</div>' +
+      '</div><button type="button" class="btn btn-primary" id="inc-comment-add">Agregar</button></div>' +
       '</div>' +
       '</div>' +
       '<div class="editside">' +
@@ -179,11 +219,82 @@
         renderDetail();
       });
     });
+
+    wireComments(inc);
+    wireComposer(inc);
+  }
+
+  function wireEditImageArea() {
+    var trigger = document.querySelector('[data-edit-attach-trigger]');
+    var input = document.querySelector('[data-edit-image-input]');
+    if (trigger && input) trigger.addEventListener('click', function () { input.click(); });
+    if (input) input.addEventListener('change', function () {
+      ImageUpload.readAsDataURL(input.files[0], function (dataUrl) { editDraft.image = dataUrl; refreshEditImageArea(); });
+    });
+    var remove = document.querySelector('[data-edit-remove-image]');
+    if (remove) remove.addEventListener('click', function () { editDraft.image = null; refreshEditImageArea(); });
+  }
+
+  function refreshEditImageArea() {
+    document.getElementById('edit-image-area').innerHTML = editImageAreaHTML(editDraft.image, true);
+    wireEditImageArea();
+  }
+
+  function wireComments(inc) {
+    root.querySelectorAll('[data-edit-comment]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var c = inc.comments.find(function (x) { return x.id === btn.getAttribute('data-edit-comment'); });
+        if (!c) return;
+        editingCommentId = c.id;
+        editDraft = { text: c.text, image: c.image || null };
+        renderDetail();
+      });
+    });
+    root.querySelectorAll('[data-delete-comment]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!confirm('¿Eliminar este comentario?')) return;
+        Store.deleteIncidenciaComment(inc.id, btn.getAttribute('data-delete-comment'));
+        renderDetail();
+      });
+    });
+    var editTextArea = root.querySelector('[data-edit-comment-text]');
+    if (editTextArea) editTextArea.addEventListener('input', function () { editDraft.text = editTextArea.value; });
+    if (editingCommentId) wireEditImageArea();
+    var cancelEditBtn = root.querySelector('[data-cancel-edit-comment]');
+    if (cancelEditBtn) cancelEditBtn.addEventListener('click', function () { editingCommentId = null; editDraft = null; renderDetail(); });
+    var saveEditBtn = root.querySelector('[data-save-edit-comment]');
+    if (saveEditBtn) saveEditBtn.addEventListener('click', function () {
+      var text = editDraft.text.trim();
+      if (!text) { editTextArea.focus(); return; }
+      Store.updateIncidenciaComment(inc.id, saveEditBtn.getAttribute('data-save-edit-comment'), { text: text, image: editDraft.image });
+      editingCommentId = null; editDraft = null;
+      renderDetail();
+    });
+  }
+
+  function wireComposer(inc) {
+    function refreshComposerImage() {
+      document.getElementById('composer-image-area').innerHTML = editImageAreaHTML(composerImage, false);
+      wireComposerImage();
+    }
+    function wireComposerImage() {
+      var trigger = document.getElementById('composer-attach-trigger');
+      var input = document.getElementById('composer-image-input');
+      if (trigger && input) trigger.addEventListener('click', function () { input.click(); });
+      if (input) input.addEventListener('change', function () {
+        ImageUpload.readAsDataURL(input.files[0], function (dataUrl) { composerImage = dataUrl; refreshComposerImage(); });
+      });
+      var remove = document.getElementById('composer-remove-image');
+      if (remove) remove.addEventListener('click', function () { composerImage = null; refreshComposerImage(); });
+    }
+    wireComposerImage();
+
     document.getElementById('inc-comment-add').addEventListener('click', function () {
       var input = document.getElementById('inc-comment-input');
       var text = input.value.trim();
       if (!text) { input.focus(); return; }
-      Store.addIncidenciaComment(inc.id, text);
+      Store.addIncidenciaComment(inc.id, text, composerImage);
+      composerImage = null;
       renderDetail();
     });
   }
@@ -194,5 +305,14 @@
   }
 
   Shell.mount({ active: 'incidencias', title: '', subtitle: '', crumb: '' });
+
+  (function checkDeepLink() {
+    var params = new URLSearchParams(window.location.search);
+    var openId = params.get('open');
+    if (openId) {
+      var inc = Store.getIncidencia(openId);
+      if (inc) { view = 'detail'; detailId = inc.id; }
+    }
+  })();
   render();
 })();

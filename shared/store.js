@@ -23,6 +23,8 @@
     { id: 'fuera_servicio', label: 'Fuera de servicio', color: 'red', weight: 4 },
   ];
 
+  var INCIDENCIA_STATUS_LABELS = { abierta: 'Abierta', en_seguimiento: 'En seguimiento', resuelta: 'Resuelta' };
+
   var SEED = {
     kitchen: 'Cocina 1',
     cats: [
@@ -464,6 +466,7 @@
 
     // ---- incidencias ----
     incidentSeverityLevels: INCIDENT_SEVERITY_LEVELS,
+    incidenciaStatusLabels: INCIDENCIA_STATUS_LABELS,
     getIncidencias: function () { return data.incidencias.slice(); },
     getIncidencia: function (id) { return data.incidencias.find(function (inc) { return inc.id === id; }) || null; },
     getIncidenciaByKey: function (laborId, dateStr, checklistItemId) {
@@ -502,16 +505,51 @@
       if (inc.instrumentoId) this.recomputeInstrumentoStatus(inc.instrumentoId); else save();
       return inc;
     },
-    addIncidenciaComment: function (id, text) {
+    addIncidenciaComment: function (id, text, image) {
       var inc = this.getIncidencia(id);
       if (!inc) return null;
-      inc.comments.push({ id: uid('com'), text: text, createdAt: Date.now() });
+      inc.comments.push({ id: uid('com'), text: text, image: image || null, createdAt: Date.now(), updatedAt: Date.now() });
       inc.updatedAt = Date.now();
+      save();
+      return inc;
+    },
+    updateIncidenciaComment: function (id, commentId, patch) {
+      var inc = this.getIncidencia(id);
+      if (!inc) return null;
+      var c = inc.comments.find(function (x) { return x.id === commentId; });
+      if (!c) return null;
+      Object.assign(c, patch, { updatedAt: Date.now() });
+      save();
+      return inc;
+    },
+    deleteIncidenciaComment: function (id, commentId) {
+      var inc = this.getIncidencia(id);
+      if (!inc) return null;
+      inc.comments = inc.comments.filter(function (x) { return x.id !== commentId; });
       save();
       return inc;
     },
     getOpenIncidenciasForInstrumento: function (instrumentoId) {
       return data.incidencias.filter(function (inc) { return inc.instrumentoId === instrumentoId && inc.status !== 'resuelta'; });
+    },
+    // The instrument reads as "still broken" for every day between an
+    // incident's report date and its resolution (or today, if still open) —
+    // so a fridge that broke on the 3rd and got fixed on the 10th shows as
+    // incidencia for every day in between, whether or not a labor ran.
+    getCoveringIncidencias: function (instrumentoId, dateStr) {
+      var today = this.todayISO();
+      return data.incidencias.filter(function (inc) {
+        if (inc.instrumentoId !== instrumentoId) return false;
+        if (dateStr < inc.date) return false;
+        if (inc.status === 'resuelta') {
+          var resolvedDate = inc.resolvedAt ? isoFromTimestamp(inc.resolvedAt) : inc.date;
+          return dateStr <= resolvedDate;
+        }
+        return dateStr <= today;
+      });
+    },
+    isInstrumentoCoveredByIncidencia: function (instrumentoId, dateStr) {
+      return this.getCoveringIncidencias(instrumentoId, dateStr).length > 0;
     },
     recomputeInstrumentoStatus: function (instrumentoId) {
       var inst = this.getInstrumento(instrumentoId);
@@ -621,6 +659,12 @@
     var d = new Date();
     function p(n) { return (n < 10 ? '0' : '') + n; }
     return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+
+  function isoFromTimestamp(ts) {
+    var d = new Date(ts);
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
   }
 
   window.Store = Store;

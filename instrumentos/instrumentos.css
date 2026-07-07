@@ -144,39 +144,70 @@
         }
 
 .hist-cell {
-          aspect-ratio: 1;
           border-radius: 12px;
           border: 1.5px solid var(--line);
           background: #fff;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          gap: 4px;
+          padding: 6px 4px;
           font-size: 13px;
           font-weight: 700;
           color: var(--t1);
           cursor: pointer;
           transition: all .15s;
-          min-height: 44px
+          min-height: 52px
         }
 
 .hist-cell.other-month {
           opacity: .35
         }
 
-.hist-cell.hist-ok {
-          background: #e7f9ee;
-          border-color: #bfe8cf;
-          color: #166534
+.hist-cell-num {
+          line-height: 1
         }
 
-.hist-cell.hist-incidencia {
-          background: #fdeaea;
-          border-color: #f3c6c6;
-          color: #b91c1c
+.hist-cell-dots {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: center;
+          gap: 3px;
+          max-width: 100%
         }
 
-.hist-cell.hist-pending {
-          background: var(--bg)
+.hist-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          box-sizing: border-box;
+          flex-shrink: 0
+        }
+
+.hist-dot-ok {
+          background: #22C55E
+        }
+
+.hist-dot-incidencia {
+          background: #EF4444
+        }
+
+.hist-dot-na {
+          background: #9CA3AF
+        }
+
+.hist-dot-pending {
+          background: transparent;
+          border: 1.5px solid var(--line-2)
+        }
+
+.hist-dot-more {
+          font-size: 9px;
+          font-weight: 700;
+          color: var(--t3);
+          line-height: 1
         }
 
 .hist-cell.today {
@@ -235,6 +266,28 @@
           line-height: 1.5
         }
 
+.hist-entry-link {
+          display: inline-block;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--brand);
+          margin-top: 8px;
+          text-decoration: none
+        }
+
+.hist-entry-link:hover {
+          text-decoration: underline
+        }
+
+.hist-entry-carry {
+          border-color: #f3c6c6;
+          background: #fdeaea
+        }
+
+.hist-entry-carry .hist-entry-name {
+          color: #b91c1c
+        }
+
 @media (max-width: 768px) {
 
   .instgrid {
@@ -247,7 +300,14 @@
 
   .hist-cell {
               font-size: 11px;
-              min-height: 34px
+              min-height: 40px;
+              padding: 4px 2px;
+              gap: 3px
+            }
+
+  .hist-dot {
+              width: 6px;
+              height: 6px
             }
 
 }

@@ -117,6 +117,16 @@
           gap: 5px
         }
 
+.kanban-inc-tag {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--red);
+          align-self: flex-start
+        }
+
 .exec-item {
           border: 1.5px solid var(--line);
           border-radius: 14px;

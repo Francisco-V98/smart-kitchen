@@ -85,6 +85,13 @@
     });
   }
 
+  function activeIncidenciaCount(labor) {
+    return labor.checklist.filter(function (ci) {
+      var inst = ci.instrumentoId ? Store.getInstrumento(ci.instrumentoId) : null;
+      return inst && inst.status !== 'bueno';
+    }).length;
+  }
+
   function occCardHTML(o) {
     var alert = hasIncidencia(o);
     var completed = o.estado === 'completada';
@@ -93,6 +100,7 @@
     var statusClass = alert ? 'incidencia' : o.estado;
     var statusLabel = alert ? 'Con incidencia' : (completed ? 'Completada' : 'Pendiente');
     var muted = completed ? 'color:var(--t3)' : '';
+    var incCount = activeIncidenciaCount(o.labor);
     return '<div class="kanban-card ' + (completed ? 'done' : '') + '" data-execute-labor="' + o.labor.id + '" data-execute-date="' + o.date + '">' +
       '<div class="kanban-card-name">' + esc(o.labor.name) + '</div>' +
       '<div class="kanban-card-meta">' +
@@ -100,6 +108,7 @@
       (o.labor.time ? '<span class="kanban-meta-item" style="' + muted + '"><svg class="ic ic12"><use href="#i-clock"></use></svg>' + esc(o.labor.time) + '</span>' : '') +
       (names ? '<span class="kanban-meta-item" style="' + muted + '"><svg class="ic ic12"><use href="#i-users"></use></svg>' + esc(names) + '</span>' : '') +
       '</div>' +
+      (incCount ? '<span class="kanban-inc-tag"><svg class="ic ic12"><use href="#i-alert-triangle"></use></svg>' + incCount + (incCount === 1 ? ' incidencia' : ' incidencias') + '</span>' : '') +
       '<span class="cal-status-pill ' + statusClass + '">' + statusLabel + '</span>' +
       '</div>';
   }
@@ -116,6 +125,9 @@
       var inc = Store.getIncidenciaByKey(laborId, dateStr, ci.id);
       results[ci.id].description = inc ? inc.description : '';
       results[ci.id].severity = inc ? inc.severity : 'revision';
+      results[ci.id].image = inc ? (inc.image || null) : null;
+      var inst = ci.instrumentoId ? Store.getInstrumento(ci.instrumentoId) : null;
+      if (inst && inst.status !== 'bueno') results[ci.id].itemStatus = 'incidencia';
     });
     executing = { laborId: laborId, date: dateStr };
     execDraft = { results: results, report: ej ? (ej.report || '') : '' };
@@ -125,12 +137,17 @@
 
   function cancelExecute() { view = 'calendar'; executing = null; execDraft = null; render(); }
 
+  function isKnownBroken(ci) {
+    var inst = ci.instrumentoId ? Store.getInstrumento(ci.instrumentoId) : null;
+    return !!(inst && inst.status !== 'bueno');
+  }
+
   function saveExecute() {
     var labor = Store.getLabor(executing.laborId);
     for (var i = 0; i < labor.checklist.length; i++) {
       var ci = labor.checklist[i];
       var r = execDraft.results[ci.id];
-      if (r.itemStatus === 'incidencia' && !(r.description || '').trim()) {
+      if (r.itemStatus === 'incidencia' && !isKnownBroken(ci) && !(r.description || '').trim()) {
         var el = root.querySelector('.exec-item[data-item="' + ci.id + '"] [data-desc-input]');
         if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         return;
@@ -143,11 +160,12 @@
     Store.saveEjecucion(executing.laborId, executing.date, { results: resultsArr, report: execDraft.report, completedBy: (labor.assigneeIds && labor.assigneeIds[0]) || null });
 
     labor.checklist.forEach(function (ci) {
+      if (isKnownBroken(ci)) return; // already tracked by its existing open incidencia, don't touch it here
       var r = execDraft.results[ci.id];
       if (r.itemStatus === 'incidencia') {
         Store.saveIncidencia(executing.laborId, executing.date, ci.id, {
           itemLabel: ci.label, instrumentoId: ci.instrumentoId || null,
-          severity: r.severity || 'revision', description: r.description.trim(),
+          severity: r.severity || 'revision', description: r.description.trim(), image: r.image || null,
         });
       } else {
         Store.deleteIncidenciaByKey(executing.laborId, executing.date, ci.id);
@@ -158,14 +176,25 @@
     render();
   }
 
+  function imageAttachHTML(ci, r) {
+    if (r.image) {
+      return '<div class="img-thumb-wrap"><img class="img-thumb" src="' + r.image + '">' +
+        '<button type="button" class="img-thumb-remove" data-remove-image="' + ci.id + '" title="Quitar imagen"><svg class="ic ic14"><use href="#i-x"></use></svg></button></div>';
+    }
+    return '<button type="button" class="img-attach-btn" data-attach-trigger="' + ci.id + '"><svg class="ic ic16"><use href="#i-image"></use></svg>Adjuntar imagen (opcional)</button>' +
+      '<input type="file" accept="image/*" data-image-input="' + ci.id + '" style="display:none">';
+  }
+
   function execItemHTML(ci) {
     var r = execDraft.results[ci.id];
     var inst = ci.instrumentoId ? Store.getInstrumento(ci.instrumentoId) : null;
+    var knownBroken = isKnownBroken(ci);
 
     var warningHTML = '';
+    var instLvl = null, openIncs = [];
     if (inst && inst.status !== 'bueno') {
-      var instLvl = Store.incidentSeverityLevels.find(function (l) { return l.id === inst.status; });
-      var openIncs = Store.getOpenIncidenciasForInstrumento(inst.id);
+      instLvl = Store.incidentSeverityLevels.find(function (l) { return l.id === inst.status; });
+      openIncs = Store.getOpenIncidenciasForInstrumento(inst.id);
       warningHTML = '<div class="exec-item-warning severity-' + instLvl.color + '"><svg class="ic ic16"><use href="#i-alert-triangle"></use></svg>' +
         '<span>' + esc(inst.name) + ' está marcado como "' + esc(instLvl.label) + '"' + (openIncs.length ? ' — ver en Incidencias.' : '') + '</span></div>';
     }
@@ -179,6 +208,22 @@
         (ci.value ? '<div class="exec-item-hint">Valor esperado: ' + esc(ci.value) + ' ' + esc(ci.unit || '') + '</div>' : '');
     }
 
+    if (knownBroken) {
+      var sortedIncs = openIncs.slice().sort(function (a, b) {
+        var wa = Store.incidentSeverityLevels.find(function (l) { return l.id === a.severity; }).weight;
+        var wb = Store.incidentSeverityLevels.find(function (l) { return l.id === b.severity; }).weight;
+        return wb - wa || (b.date < a.date ? -1 : 1);
+      });
+      var targetId = sortedIncs.length ? sortedIncs[0].id : '';
+      return '<div class="exec-item" data-item="' + ci.id + '">' +
+        warningHTML +
+        '<div class="exec-item-head">' + (inst ? '<svg class="ic ic18" style="color:var(--brand);flex-shrink:0"><use href="' + inst.icon + '"></use></svg>' : '') +
+        '<div class="exec-item-label">' + esc(ci.label) + '</div></div>' +
+        valueHTML +
+        '<button type="button" class="btn btn-ghost f1" style="margin-top:12px" data-view-incidencia="' + targetId + '"><svg class="ic ic18"><use href="#i-alert-triangle"></use></svg><span>Ver incidencia</span></button>' +
+        '</div>';
+    }
+
     var incidenciaHTML = '';
     if (r.itemStatus === 'incidencia') {
       var sevButtons = Store.incidentSeverityLevels.filter(function (l) { return l.id !== 'bueno'; }).map(function (l) {
@@ -188,6 +233,7 @@
         '<label>Severidad</label><div class="severity-pick-row">' + sevButtons + '</div>' +
         '<label>Describe la incidencia <span style="color:var(--red)">*</span></label>' +
         '<textarea class="textarea" data-desc-input="' + ci.id + '" placeholder="Ej. Nevera 2 no quiere enfriar, la temperatura no baja de 12°C.">' + esc(r.description || '') + '</textarea>' +
+        '<label>Imagen</label>' + imageAttachHTML(ci, r) +
         '</div>';
     }
 
@@ -224,6 +270,25 @@
     });
     var descInput = el.querySelector('[data-desc-input]');
     if (descInput) descInput.addEventListener('input', function () { execDraft.results[ci.id].description = descInput.value; });
+    var attachTrigger = el.querySelector('[data-attach-trigger]');
+    var imageInput = el.querySelector('[data-image-input]');
+    if (attachTrigger && imageInput) attachTrigger.addEventListener('click', function () { imageInput.click(); });
+    if (imageInput) imageInput.addEventListener('change', function () {
+      ImageUpload.readAsDataURL(imageInput.files[0], function (dataUrl) {
+        execDraft.results[ci.id].image = dataUrl;
+        refreshExecItem(ci);
+      });
+    });
+    var removeImageBtn = el.querySelector('[data-remove-image]');
+    if (removeImageBtn) removeImageBtn.addEventListener('click', function () {
+      execDraft.results[ci.id].image = null;
+      refreshExecItem(ci);
+    });
+    var viewIncBtn = el.querySelector('[data-view-incidencia]');
+    if (viewIncBtn) viewIncBtn.addEventListener('click', function () {
+      var id = viewIncBtn.getAttribute('data-view-incidencia');
+      window.location.href = '../incidencias/index.html' + (id ? '?open=' + encodeURIComponent(id) : '');
+    });
   }
 
   function refreshExecItem(ci) {

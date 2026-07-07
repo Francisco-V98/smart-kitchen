@@ -146,6 +146,44 @@
           padding: 12px 14px
         }
 
+.comment-item-top {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 10px
+        }
+
+.comment-actions {
+          display: flex;
+          gap: 4px;
+          flex-shrink: 0
+        }
+
+.comment-action-btn {
+          width: 26px;
+          height: 26px;
+          border-radius: 8px;
+          border: 1px solid var(--line-2);
+          background: #fff;
+          color: var(--t3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer
+        }
+
+.comment-action-btn:hover {
+          border-color: var(--brand);
+          color: var(--brand)
+        }
+
+.comment-edit-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 10px
+        }
+
 .comment-text {
           font-size: 13.5px;
           color: var(--t1);

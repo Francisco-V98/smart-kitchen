@@ -309,11 +309,29 @@
     return cells;
   }
 
-  function dayStatusFor(entries) {
-    if (!entries.length) return 'none';
-    if (entries.some(function (e) { return e.itemStatus === 'incidencia'; })) return 'incidencia';
-    if (entries.every(function (e) { return e.itemStatus; })) return 'ok';
-    return 'pending';
+  // One dot per real checklist-item execution that day (green ok / red
+  // incidencia / gray na / hollow pending), plus — if nothing already went
+  // red today — an extra red "carry-forward" dot when an open incidencia
+  // still covers this date, so the day reads as broken even with no labor
+  // due on it.
+  function dayDotsFor(instId, iso) {
+    var entries = Store.getInstrumentoHistoryForDate(instId, iso);
+    var dots = entries.map(function (e) {
+      return e.itemStatus === 'incidencia' ? 'incidencia' : e.itemStatus === 'ok' ? 'ok' : e.itemStatus === 'na' ? 'na' : 'pending';
+    });
+    if (dots.indexOf('incidencia') === -1 && Store.isInstrumentoCoveredByIncidencia(instId, iso)) dots.push('incidencia');
+    return dots;
+  }
+
+  function dotsHTML(dots) {
+    if (!dots.length) return '';
+    var MAX = 6;
+    var shown = dots.slice(0, MAX);
+    var extra = dots.length - shown.length;
+    return '<div class="hist-cell-dots">' +
+      shown.map(function (t) { return '<span class="hist-dot hist-dot-' + t + '"></span>'; }).join('') +
+      (extra > 0 ? '<span class="hist-dot-more">+' + extra + '</span>' : '') +
+      '</div>';
   }
 
   function renderHistorial() {
@@ -327,13 +345,12 @@
     var weekdaysHTML = WEEKDAYS.map(function (w) { return '<div class="hist-weekday">' + w + '</div>'; }).join('');
 
     var cellsHTML = cells.map(function (c) {
-      var entries = Store.getInstrumentoHistoryForDate(inst.id, c.iso);
-      var status = dayStatusFor(entries);
-      var classes = ['hist-cell', 'hist-' + status];
+      var dots = dayDotsFor(inst.id, c.iso);
+      var classes = ['hist-cell'];
       if (!c.inMonth) classes.push('other-month');
       if (c.iso === Store.todayISO()) classes.push('today');
       if (c.iso === historialSelectedDate) classes.push('selected');
-      return '<div class="' + classes.join(' ') + '" data-date="' + c.iso + '"><span>' + c.date.getDate() + '</span></div>';
+      return '<div class="' + classes.join(' ') + '" data-date="' + c.iso + '"><span class="hist-cell-num">' + c.date.getDate() + '</span>' + dotsHTML(dots) + '</div>';
     }).join('');
 
     var selEntries = Store.getInstrumentoHistoryForDate(inst.id, historialSelectedDate);
@@ -346,8 +363,26 @@
       return '<div class="hist-entry">' +
         '<div class="hist-entry-top"><span class="hist-entry-name">' + esc(entry.labor.name) + '</span><span class="cal-status-pill ' + statusClass + '">' + statusLabel + '</span></div>' +
         (inc ? '<div class="hist-entry-desc">' + esc(inc.description) + '</div>' : '') +
+        (inc ? '<a class="hist-entry-link" href="../incidencias/index.html?open=' + inc.id + '">Ver incidencia →</a>' : '') +
         '</div>';
     }).join('');
+
+    // If nothing executed today already reads as incidencia, surface any
+    // still-open incident that silently covers this date via carry-forward
+    // (e.g. a weekend day with no labor due) so the panel never contradicts
+    // the red dot shown in the grid.
+    var hasRealIncidenciaToday = selEntries.some(function (entry) { return entry.itemStatus === 'incidencia'; });
+    var carryHTML = (hasRealIncidenciaToday ? [] : Store.getCoveringIncidencias(inst.id, historialSelectedDate)).map(function (inc) {
+      var lvl2 = severityLevel(inc.severity);
+      var name = inc.status === 'resuelta' ? 'Incidencia resuelta este día' : 'Incidencia activa';
+      return '<div class="hist-entry hist-entry-carry">' +
+        '<div class="hist-entry-top"><span class="hist-entry-name">' + name + '</span>' +
+        '<span class="severity-badge severity-' + lvl2.color + '"><span class="severity-dot severity-' + lvl2.color + '"></span>' + esc(lvl2.label) + '</span></div>' +
+        '<div class="hist-entry-desc">' + esc(inc.description) + '</div>' +
+        '<a class="hist-entry-link" href="../incidencias/index.html?open=' + inc.id + '">Ver incidencia →</a>' +
+        '</div>';
+    }).join('');
+    entriesHTML += carryHTML;
 
     root.innerHTML = '' +
       '<a class="hist-back" id="hist-back-link">← Volver a instrumentos</a>' +
